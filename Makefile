@@ -1,4 +1,4 @@
-NAME		= webserv
+NAME		= IRC
 	
 CC			= c++
 FLAGS		= -Wall -Wextra -Werror -std=c++98
@@ -9,7 +9,7 @@ SRCDIR		= srcs
 INCDIR		= inc
 
 FILES		= main 
-INCFILE		= webserv
+INCFILE		= irc
 
 SRC			= $(addprefix $(SRCDIR)/, $(FILES:=.cpp))
 OBJ			= $(addprefix $(OBJDIR)/, $(FILES:=.o))
