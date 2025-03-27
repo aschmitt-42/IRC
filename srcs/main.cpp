@@ -22,7 +22,6 @@ int test2()
 
     // on crée la socket, on a lit et on écoute dessus
     socket_fd = socket(sa.sin_family, SOCK_STREAM, 0);
-    fcntl(socket_fd, F_SETFL, O_NONBLOCK);
     if (socket_fd == -1) {
         fprintf(stderr, "socket fd error: %s\n", strerror(errno));
         return (1);
@@ -106,7 +105,7 @@ int main(int argc, char **argv)
     }
     (void)argv;
 
-    test2();
+    server();
 
     return 0;
 }

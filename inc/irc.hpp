@@ -11,5 +11,11 @@
 # include <unistd.h>
 # include <sys/socket.h> 
 # include <fcntl.h>
+# include <errno.h>
+# include <stdlib.h>
+# include <sys/select.h>
+# include <sys/types.h>
+
+int    server(void);
 
 #endif
