@@ -15,7 +15,9 @@
 # include <stdlib.h>
 # include <sys/select.h>
 # include <sys/types.h>
-
+#include <poll.h>
+#include <sys/poll.h>
+#include <sys/socket.h>
 int    server(void);
 
 #endif

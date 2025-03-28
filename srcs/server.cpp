@@ -30,8 +30,29 @@ int create_server_socket(void) {
     return (socket_fd);
 }
 
+void add_to_poll_fds(struct pollfd *poll_fds[], int new_fd, int *poll_count, int *poll_size) 
+{   
+    if (*poll_count == *poll_size) {
+        *poll_size *= 2;
+        *poll_fds = (pollfd*)realloc(*poll_fds, sizeof(**poll_fds) * (*poll_size));
+        if (!*poll_fds) {
+            perror("realloc failed");
+            exit(EXIT_FAILURE);
+        }
+    }
 
-void accept_new_connection(int server_socket, fd_set *all_sockets, int *fd_max)
+    (*poll_fds)[*poll_count].fd = new_fd;
+    (*poll_fds)[*poll_count].events = POLLIN;
+    (*poll_count)++;
+}
+
+void del_from_poll_fds(struct pollfd **poll_fds, int i, int *poll_count) {
+    // Copie le fd de la fin du tableau à cet index
+    (*poll_fds)[i] = (*poll_fds)[*poll_count - 1];
+    (*poll_count)--;
+}
+
+void accept_new_connection(int server_socket, struct pollfd **poll_fds, int *poll_count, int *poll_size)
 {
     int client_fd;
     char msg_to_send[BUFSIZ];
@@ -42,11 +63,11 @@ void accept_new_connection(int server_socket, fd_set *all_sockets, int *fd_max)
         fprintf(stderr, "[Server] Accept error: %s\n", strerror(errno));
         return ;
     }
-    FD_SET(client_fd, all_sockets); // Ajoute la socket client à l'ensemble
-    if (client_fd > *fd_max) {
-        *fd_max = client_fd; // Met à jour la plus grande socket
-    }
+
+    add_to_poll_fds(poll_fds, client_fd, poll_count, poll_size);
+
     printf("[Server] Accepted new connection on client socket %d.\n", client_fd);
+
     memset(&msg_to_send, '\0', sizeof msg_to_send);
     sprintf(msg_to_send, "Welcome. You are client fd [%d]\n", client_fd);
     status = send(client_fd, msg_to_send, strlen(msg_to_send), 0);
@@ -57,37 +78,42 @@ void accept_new_connection(int server_socket, fd_set *all_sockets, int *fd_max)
 
 
 // Lit le message d'une socket et relaie le message à toutes les autres
-void read_data_from_socket(int socket, fd_set *all_sockets, int fd_max, int server_socket)
+void read_data_from_socket(int i, struct pollfd **poll_fds, int *poll_count, int server_socket)
 {
     char buffer[BUFSIZ];
     char msg_to_send[BUFSIZ];
     int bytes_read;
     int status;
+    int dest_fd;
+    int sender_fd;
 
+    sender_fd = (*poll_fds)[i].fd;
     memset(&buffer, '\0', sizeof buffer);
-    bytes_read = recv(socket, buffer, BUFSIZ, 0);
+    bytes_read = recv(sender_fd, buffer, BUFSIZ, 0);
     if (bytes_read <= 0) {
         if (bytes_read == 0) {
-            printf("[%d] Client socket closed connection.\n", socket);
+            printf("[%d] Client socket closed connection.\n", sender_fd);
         }
         else {
             fprintf(stderr, "[Server] Recv error: %s\n", strerror(errno));
         }
-        close(socket); // Ferme la socket
-        FD_CLR(socket, all_sockets); // Enlève la socket de l'ensemble
+        close(sender_fd);
+        del_from_poll_fds(poll_fds, i, poll_count);
     }
     else {
         // Renvoie le message reçu à toutes les sockets connectées
         // à part celle du serveur et celle qui l'a envoyée
-        printf("[%d] Got message: %s", socket, buffer);
+        printf("[%d] Got message: %s", sender_fd, buffer);
+    
         memset(&msg_to_send, '\0', sizeof msg_to_send);
-        snprintf(msg_to_send, sizeof(msg_to_send), "[%d] says: %s", socket, buffer);
+        snprintf(msg_to_send, sizeof(msg_to_send), "[%d] says: %s", sender_fd, buffer);
         // sprintf(msg_to_send, "[%d] says: %s", socket, buffer);
-        for (int j = 0; j <= fd_max; j++) {
-            if (FD_ISSET(j, all_sockets) && j != server_socket && j != socket) {
-                status = send(j, msg_to_send, strlen(msg_to_send), 0);
+        for (int j = 0; j <= *poll_count; j++) {
+            dest_fd = (*poll_fds)[j].fd;
+            if (dest_fd != server_socket && dest_fd != sender_fd) {
+                status = send(dest_fd, msg_to_send, strlen(msg_to_send), 0);
                 if (status == -1) {
-                    fprintf(stderr, "[Server] Send error to client fd %d: %s\n", j, strerror(errno));
+                    fprintf(stderr, "[Server] Send error to client fd %d: %s\n", dest_fd, strerror(errno));
                 }
             }
         }
@@ -103,10 +129,9 @@ int    server(void)
     int status;
 
     // Pour surveiller les sockets clients :
-    fd_set all_sockets; // Ensemble de toutes les sockets du serveur
-    fd_set read_fds;    // Ensemble temporaire pour select()
-    int fd_max;         // Descripteur de la plus grande socket
-    struct timeval timer;
+    struct pollfd *poll_fds; // Tableau de descripteurs
+    int poll_size; // Taille du tableau de descipteurs
+    int poll_count; // Nombre actuel de descripteurs dans le tableau
 
     // Création de la socket du serveur
     server_socket = create_server_socket();
@@ -122,50 +147,51 @@ int    server(void)
         return (3);
     }
 
-    // Préparation des ensembles de sockets pour select()
-    FD_ZERO(&all_sockets);
-    FD_ZERO(&read_fds);
-    FD_SET(server_socket, &all_sockets); // Ajout de la socket principale à l'ensemble
-    fd_max = server_socket; // Le descripteur le plus grand est forcément celui de notre seule socket
-    printf("[Server] Set up select fd sets\n");
+    // Préparation du tableau des descripteurs de fichier pour poll()
+    // On va commencer avec assez de place pour 5 fds dans le tableau,
+    // on réallouera si nécessaire
+    poll_size = 5;
+    poll_fds = (pollfd*)calloc(poll_size + 1, sizeof *poll_fds);
+    if (!poll_fds) {
+        return (4);
+    }
+
+    // Ajoute la socket du serveur au tableau
+    // avec alerte si la socket peut être lue
+    poll_fds[0].fd = server_socket;
+    poll_fds[0].events = POLLIN;
+    poll_count = 1;
+
+    printf("[Server] Set up poll fd array\n");
 
     while (1) { // Boucle principale
-        // Copie l'ensemble des sockets puisque select() modifie l'ensemble surveillé
-        read_fds = all_sockets;
-        // Timeout de 2 secondes pour select()
-        timer.tv_sec = 2;
-        timer.tv_usec = 0;
 
-        // Surveille les sockets prêtes à être lues
-        status = select(fd_max + 1, &read_fds, NULL, NULL, &timer);
+        // Sonde les sockets prêtes (avec timeout de 2 secondes)
+        status = poll(poll_fds, poll_count, 2000);
         if (status == -1) {
-            fprintf(stderr, "[Server] Select error: %s\n", strerror(errno));
+            fprintf(stderr, "[Server] Poll error: %s\n", strerror(errno));
             exit(1);
         }
         else if (status == 0) {
-            // Aucun descipteur de fichier de socket n'est prêt pour la lecture
             printf("[Server] Waiting...\n");
             continue;
         }
 
-        // Boucle sur nos sockets
-        for (int i = 0; i <= fd_max; i++) {
-            if (FD_ISSET(i, &read_fds) != 1) {
-                // Le fd i n'est pas une socket à surveiller
-                // on s'arrête là et on continue la boucle
+        for (int i = 0; i < poll_count; i++) {
+            if ((poll_fds[i].revents & POLLIN) != 1) {
                 continue ;
             }
-            printf("[%d] Ready for I/O operation\n", i);
-            // La socket est prête à être lue !
-            if (i == server_socket) {
-                // La socket est notre socket serveur qui écoute le port
-                accept_new_connection(server_socket, &all_sockets, &fd_max);
+            printf("[%d] Ready for I/O operation\n", poll_fds[i].fd);
+            if (poll_fds[i].fd == server_socket) {
+                accept_new_connection(server_socket, &poll_fds, &poll_count, &poll_size);
             }
             else {
-                // La socket est une socket client, on va la lire
-                read_data_from_socket(i, &all_sockets, fd_max, server_socket);
+                read_data_from_socket(i, &poll_fds, &poll_count, server_socket);
             }
         }
     }
+
+    
     return (0);
 }
+
