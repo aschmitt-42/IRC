@@ -13,7 +13,7 @@ int create_server_socket(void) {
     sa.sin_port = htons(4242);
 
     // Création de la socket
-    socket_fd = socket(sa.sin_family, SOCK_STREAM, 0);
+    socket_fd = socket(sa.sin_family, SOCK_STREAM, 0); // SOCK_STREAM = TCP
     if (socket_fd == -1) {
         fprintf(stderr, "[Server] Socket error: %s\n", strerror(errno));
         return (-1);
@@ -128,18 +128,15 @@ int    server(void)
     int server_socket;
     int status;
 
-    // Pour surveiller les sockets clients :
     struct pollfd *poll_fds; // Tableau de descripteurs
-    int poll_size; // Taille du tableau de descipteurs
-    int poll_count; // Nombre actuel de descripteurs dans le tableau
+    int poll_size; // Taille du tableau
+    int poll_count; // Nombre actuel de descripteurs
 
-    // Création de la socket du serveur
     server_socket = create_server_socket();
     if (server_socket == -1) {
         return (1);
     }
 
-    // Écoute du port via la socket
     printf("[Server] Listening on port %d\n", 4242);
     status = listen(server_socket, 10);
     if (status != 0) {
@@ -148,23 +145,19 @@ int    server(void)
     }
 
     // Préparation du tableau des descripteurs de fichier pour poll()
-    // On va commencer avec assez de place pour 5 fds dans le tableau,
-    // on réallouera si nécessaire
-    poll_size = 5;
+    poll_size = 10;
     poll_fds = (pollfd*)calloc(poll_size + 1, sizeof *poll_fds);
     if (!poll_fds) {
         return (4);
     }
 
-    // Ajoute la socket du serveur au tableau
-    // avec alerte si la socket peut être lue
     poll_fds[0].fd = server_socket;
     poll_fds[0].events = POLLIN;
     poll_count = 1;
 
     printf("[Server] Set up poll fd array\n");
 
-    while (1) { // Boucle principale
+    while (1) {
 
         // Sonde les sockets prêtes (avec timeout de 2 secondes)
         status = poll(poll_fds, poll_count, 2000);
@@ -178,7 +171,9 @@ int    server(void)
         }
 
         for (int i = 0; i < poll_count; i++) {
+            printf("i = %d et revevents: %d\n", i, poll_fds[i].revents);
             if ((poll_fds[i].revents & POLLIN) != 1) {
+                printf("caca i = %d et revevents: %d\n", i, poll_fds[i].revents);
                 continue ;
             }
             printf("[%d] Ready for I/O operation\n", poll_fds[i].fd);
