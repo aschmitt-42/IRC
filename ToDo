@@ -1,0 +1,6 @@
+#To Do List
+
+[ ] recuperer argument : le port, password
+[ ] creer class server:
+    - [ ] tableau de fd descriptor
+    - [ ] ....

@@ -1,0 +1,45 @@
+# Fichiers binaires et exécutables
+*.exe
+*.out
+*.app
+*.dll
+*.so
+*.dylib
+
+# Fichiers objets et temporaires
+*.o
+*.obj
+*.lo
+*.a
+*.lib
+*.pch
+*.pdb
+*.ilk
+*.idb
+
+# Fichiers de compilation
+Makefile
+CMakeCache.txt
+CMakeFiles/
+*.make
+*.ninja
+build/
+debug/
+release/
+
+# Fichiers de logs et temporaires
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# Fichiers générés par IDE
+.vscode/
+.idea/
+*.code-workspace
+*.sln
+*.vcxproj*
+*.xcodeproj/
+*.DS_Store
+

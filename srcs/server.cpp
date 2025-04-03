@@ -1,56 +1,43 @@
 #include "irc.hpp"
 
 int create_server_socket(void) {
-    struct sockaddr_in sa;
-    int socket_fd;
-    int status;
-
-    
-    // Préparaton de l'adresse et du port pour la socket de notre serveur
-    memset(&sa, 0, sizeof sa);
-    sa.sin_family = AF_INET; // IPv4
-    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // 127.0.0.1, localhost
-    sa.sin_port = htons(4242);
 
     // Création de la socket
-    socket_fd = socket(sa.sin_family, SOCK_STREAM, 0); // SOCK_STREAM = TCP
+    int socket_fd = socket(AF_INET, SOCK_STREAM, 0); // SOCK_STREAM = TCP
     if (socket_fd == -1) {
-        fprintf(stderr, "[Server] Socket error: %s\n", strerror(errno));
+        std::cerr << "[Server] Socket error: " << strerror(errno) << std::endl;
         return (-1);
     }
-    printf("[Server] Created server socket fd: %d\n", socket_fd);
+
+    int tmp = 1;
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &tmp, sizeof(tmp))){
+        std::cerr << "[Server] Socket option error: " << strerror(errno) << std::endl;
+        return (-1);
+    }
+
+    // fcntl maybe for NON-BLOCKING SERVER
 
     // Liaison de la socket à l'adresse et au port
-    status = bind(socket_fd, (struct sockaddr *)&sa, sizeof sa);
-    if (status != 0) {
-        fprintf(stderr, "[Server] Bind error: %s\n", strerror(errno));
+    struct sockaddr_in sockaddr;
+    memset(&sockaddr, 0, sizeof(sockaddr));
+
+    sockaddr.sin_family = AF_INET; // IPv4
+    sockaddr.sin_addr.s_addr = INADDR_ANY; // ou pour accessible que localement htonl(INADDR_LOOPBACK); // 127.0.0.1, localhost
+    sockaddr.sin_port = htons(4242); // actuellement 4242 mais a changer avec le 1er paramettre
+    
+    if (bind(socket_fd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) != 0) {
+        std::cerr << "[Server] Bind error: " << strerror(errno) << std::endl;
         return (-1);
     }
-    printf("[Server] Bound socket to localhost port %d\n", 4242);
-    return (socket_fd);
-}
+    std::cout << "[Server] Bound socket to localhost port " << 4242 << std::endl;
 
-void add_to_poll_fds(struct pollfd *poll_fds[], int new_fd, int *poll_count, int *poll_size) 
-{   
-    if (*poll_count == *poll_size) {
-        *poll_size *= 2;
-        *poll_fds = (pollfd*)realloc(*poll_fds, sizeof(**poll_fds) * (*poll_size));
-        if (!*poll_fds) {
-            perror("realloc failed");
-            exit(EXIT_FAILURE);
-        }
+    if (listen(socket_fd, 10) != 0){
+        std::cerr << "[Server] Listen error: " << strerror(errno) << std::endl;
+        return (-1);
     }
-
-    (*poll_fds)[*poll_count].fd = new_fd;
-    (*poll_fds)[*poll_count].events = POLLIN;
-    (*poll_count)++;
+    return socket_fd;
 }
 
-void del_from_poll_fds(struct pollfd **poll_fds, int i, int *poll_count) {
-    // Copie le fd de la fin du tableau à cet index
-    (*poll_fds)[i] = (*poll_fds)[*poll_count - 1];
-    (*poll_count)--;
-}
 
 void accept_new_connection(int server_socket, struct pollfd **poll_fds, int *poll_count, int *poll_size)
 {
@@ -77,7 +64,6 @@ void accept_new_connection(int server_socket, struct pollfd **poll_fds, int *pol
 }
 
 
-// Lit le message d'une socket et relaie le message à toutes les autres
 void read_data_from_socket(int i, struct pollfd **poll_fds, int *poll_count, int server_socket)
 {
     char buffer[BUFSIZ];
@@ -120,29 +106,20 @@ void read_data_from_socket(int i, struct pollfd **poll_fds, int *poll_count, int
     }
 }
 
-
 int    server(void)
 {
-    printf("---- SERVER ----\n\n");
-
-    int server_socket;
-    int status;
+    std::cout << "---- SERVER ----\n" << std::endl;
 
     struct pollfd *poll_fds; // Tableau de descripteurs
     int poll_size; // Taille du tableau
     int poll_count; // Nombre actuel de descripteurs
 
-    server_socket = create_server_socket();
+    int server_socket = create_server_socket();
     if (server_socket == -1) {
         return (1);
     }
+    std::cout << "[Server] Listening on port " << 4242 << std::endl;
 
-    printf("[Server] Listening on port %d\n", 4242);
-    status = listen(server_socket, 10);
-    if (status != 0) {
-        fprintf(stderr, "[Server] Listen error: %s\n", strerror(errno));
-        return (3);
-    }
 
     // Préparation du tableau des descripteurs de fichier pour poll()
     poll_size = 10;
@@ -160,7 +137,7 @@ int    server(void)
     while (1) {
 
         // Sonde les sockets prêtes (avec timeout de 2 secondes)
-        status = poll(poll_fds, poll_count, 2000);
+        int status = poll(poll_fds, poll_count, 2000);
         if (status == -1) {
             fprintf(stderr, "[Server] Poll error: %s\n", strerror(errno));
             exit(1);
@@ -190,3 +167,26 @@ int    server(void)
     return (0);
 }
 
+
+
+/*
+
+if (poll(_pfds.begin().base(), _pfds.size(), -1) < 0){ 
+            throw std::runtime_error("Error while polling from fd!");
+            std::cout << "waiiiiittt" << std::endl;
+        }
+    
+
+    . Objectif de poll
+        La fonction poll permet de surveiller simultanément plusieurs descripteurs de fichiers pour des événements spécifiques. 
+        Elle est particulièrement utile dans les applications réseau, comme les serveurs, où plusieurs clients peuvent se connecter en même temps. 
+        Cette approche évite l'utilisation de boucles d'attente active, ce qui améliore l'efficacité du programme.
+
+
+    2. Paramètres passés à poll
+        - _pfds.begin().base() : Cette expression retourne un pointeur vers le tableau sous-jacent contenant les structures pollfd dans le conteneur _pfds. 
+        Chaque structure pollfd représente un descripteur de fichier surveillé et les événements qui l'intéressent (par exemple, POLLIN pour les données entrantes).
+        - _pfds.size() : Ce paramètre indique le nombre de descripteurs de fichiers surveillés, correspondant à la taille du conteneur _pfds.
+        - -1 : Ce paramètre représente le délai d'attente (timeout). 
+        Une valeur de -1 signifie que la fonction poll bloquera indéfiniment jusqu'à ce qu'au moins un descripteur de fichier soit prêt pour un événement.
+*/
