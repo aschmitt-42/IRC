@@ -1,11 +1,11 @@
-NAME		= IRC
+NAME		= ircserv
 	
 CC			= c++
 FLAGS		= -Wall -Wextra -Werror -std=c++98
 RM			= rm -rf
 
 OBJDIR		= .objFiles
-SRCDIR		= srcs
+SRCDIR		= src
 INCDIR		= inc
 
 FILES		= main server server_aux
