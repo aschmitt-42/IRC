@@ -12,7 +12,7 @@ void verif_port(std::string port)
 
 int main(int argc, char **argv)
 {
-    if (argc != 2){
+    if (argc != 3){
         std::cerr << "Usage: ./ircserv port password" << std::endl;
         return 1; 
     }

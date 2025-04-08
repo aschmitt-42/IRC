@@ -28,14 +28,21 @@ class Server
 		std::string			_password;
 		std::vector<pollfd>	_poll_fds;		// Tableau des descripteur
 
+
+		void read_data_from_socket(int clien_fd);
+		void accept_new_connection();
+
 	public :
 		Server(std::string port, std::string password);
 		~Server();
 		Server(const Server &other);
 		Server& operator=(const Server &other);
 		void	start();
+		void	del_from_poll_fds(int client_fd) ;
 };
 
 // std::ostream& operator<<(std::ostream& os, const server& other);
+int create_server_socket(int port);
+void add_to_poll_fds(struct pollfd *poll_fds[], int new_fd, int *poll_count, int *poll_size);
 
 #endif

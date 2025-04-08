@@ -1,24 +1,40 @@
 #include "irc.hpp"
 
-void add_to_poll_fds(struct pollfd *poll_fds[], int new_fd, int *poll_count, int *poll_size) 
-{   
-    if (*poll_count == *poll_size) {
-        *poll_size *= 2;
-        *poll_fds = (pollfd*)realloc(*poll_fds, sizeof(**poll_fds) * (*poll_size));
-        if (!*poll_fds) {
-            perror("realloc failed");
-            exit(EXIT_FAILURE);
-        }
+int create_server_socket(int port) {
+
+    // Création de la socket
+    int socket_fd = socket(AF_INET, SOCK_STREAM, 0); // SOCK_STREAM = TCP
+    if (socket_fd == -1) {
+        std::cerr << "[Server] Socket error: " << strerror(errno) << std::endl;
+        return (-1);
     }
 
-    (*poll_fds)[*poll_count].fd = new_fd;
-    (*poll_fds)[*poll_count].events = POLLIN;
-    (*poll_count)++;
+    int tmp = 1;
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &tmp, sizeof(tmp))){
+        std::cerr << "[Server] Socket option error: " << strerror(errno) << std::endl;
+        return (-1);
+    }
+
+    // fcntl maybe for NON-BLOCKING SERVER
+
+    // Liaison de la socket à l'adresse et au port
+    struct sockaddr_in sockaddr;
+    memset(&sockaddr, 0, sizeof(sockaddr));
+
+    sockaddr.sin_family = AF_INET; // IPv4
+    sockaddr.sin_addr.s_addr = INADDR_ANY; // ou pour accessible que localement htonl(INADDR_LOOPBACK); // 127.0.0.1, localhost
+    sockaddr.sin_port = htons(port); // actuellement 4242 mais a changer avec le 1er paramettre
+    
+    if (bind(socket_fd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) != 0) {
+        std::cerr << "[Server] Bind error: " << strerror(errno) << std::endl;
+        return (-1);
+    }
+
+    if (listen(socket_fd, 10) != 0){
+        std::cerr << "[Server] Listen error: " << strerror(errno) << std::endl;
+        return (-1);
+    }
+    return socket_fd;
 }
 
-void del_from_poll_fds(struct pollfd **poll_fds, int i, int *poll_count) 
-{
-    // Copie le fd de la fin du tableau à cet index
-    (*poll_fds)[i] = (*poll_fds)[*poll_count - 1];
-    (*poll_count)--;
-}
+
