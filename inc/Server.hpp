@@ -2,7 +2,7 @@
 # define SERVER_HPP
 
 # include "irc.hpp"
-# include "client.hpp"
+# include "Client.hpp"
 # include <iostream>
 # include <fstream>
 # include <string>
@@ -29,6 +29,7 @@ class Server
 		std::string			_port;
 		std::string			_password;
 		std::vector<pollfd>	_poll_fds;		// Tableau des descripteur
+		std::vector<Client*>	_clients;	// Tableau des clients
 
 
 		void read_data_from_socket(int clien_fd);

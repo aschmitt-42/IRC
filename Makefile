@@ -8,8 +8,8 @@ OBJDIR		= .objFiles
 SRCDIR		= src
 INCDIR		= inc
 
-FILES		= main server server_aux
-INCFILE		= irc
+FILES		= main server server_aux Client
+INCFILE		= irc Server Client
 
 SRC			= $(addprefix $(SRCDIR)/, $(FILES:=.cpp))
 OBJ			= $(addprefix $(OBJDIR)/, $(FILES:=.o))

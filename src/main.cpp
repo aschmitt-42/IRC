@@ -1,4 +1,6 @@
 #include "irc.hpp"
+#include "Server.hpp"
+#include "Client.hpp"
 
 void verif_port(std::string port)
 {

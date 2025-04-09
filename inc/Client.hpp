@@ -1,5 +1,5 @@
-#ifndef IRC_HPP
-# define IRC_HPP
+#ifndef CLIENT_HPP
+# define CLIENT_HPP
 
 # include <iostream>
 # include <fstream>
@@ -18,9 +18,22 @@
 # include <poll.h>
 # include <sys/poll.h>
 # include <sys/socket.h>
-# include <sstream>
+# include <vector>
 
 
-std::string intToString(int number);
+class Client
+{
+	private :
+		std::string	_nickname;
+		
+		pollfd		_client_poll;
+
+	public :
+		std::string	_username;
+		Client(pollfd client_poll);
+		~Client();
+};
+
+// std::ostream& operator<<(std::ostream& os, const Client& other);
 
 #endif

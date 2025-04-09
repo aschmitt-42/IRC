@@ -1,5 +1,6 @@
 #include "Server.hpp"
-
+#include "Client.hpp"
+#include "irc.hpp"
 Server::Server(std::string port, std::string password)
 {
 	_port = port;
@@ -42,8 +43,10 @@ void Server::accept_new_connection()
         return ;
     }
 
-    pollfd clien_poll = {client_fd, POLLIN, 0};
-    _poll_fds.push_back(clien_poll);
+    pollfd tt = {client_fd, POLLIN, 0};
+    Client *client = new Client(tt);
+    _poll_fds.push_back(tt);
+    _clients.push_back(client);
 
     std::cout << "[Server] New client connected on fd " << client_fd << std::endl;
 
@@ -144,6 +147,10 @@ void	Server::start()
                 if (it->fd == _server_socket)
                 {
                     this->accept_new_connection();
+                    for (std::vector<Client*>::iterator it2 = _clients.begin(); it2 != _clients.end(); ++it2)
+                    {
+                        std::cout << "Client name: " << (*it2)->_username << std::endl;
+                    }
                     break;
                 }
                 
