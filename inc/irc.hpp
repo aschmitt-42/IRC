@@ -19,6 +19,9 @@
 # include <poll.h>
 # include <sys/poll.h>
 # include <sys/socket.h>
+# include <sstream>
 
+
+std::string intToString(int number);
 
 #endif

@@ -1,6 +1,22 @@
 #To Do List
 
-[ ] recuperer argument : le port, password
-[ ] creer class server:
+[X] recuperer argument : le port, password
+[X] creer class server:
     - [ ] tableau de fd descriptor
     - [ ] ....
+
+[ ] creer class client:
+    - [ ] 
+
+[ ] creer class chanells:
+    - [ ] 
+
+[ ] message plus long que buffer size caractere non imprimable:
+
+[ ] gerer les deconnexion
+
+[ ] voir les differents REVENTS :
+    - [ ] POLLHERR
+    - [ ] POLLHUP
+    - [ ] POLLIN
+    - [ ] ...

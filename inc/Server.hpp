@@ -1,6 +1,8 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
+# include "irc.hpp"
+# include "client.hpp"
 # include <iostream>
 # include <fstream>
 # include <string>
@@ -35,8 +37,6 @@ class Server
 	public :
 		Server(std::string port, std::string password);
 		~Server();
-		Server(const Server &other);
-		Server& operator=(const Server &other);
 		void	start();
 		void	del_from_poll_fds(int client_fd) ;
 };

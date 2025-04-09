@@ -37,4 +37,9 @@ int create_server_socket(int port) {
     return socket_fd;
 }
 
-
+std::string intToString(int number) 
+{
+    std::ostringstream oss;
+    oss << number;
+    return oss.str();
+}
