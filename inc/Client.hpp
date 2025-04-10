@@ -26,9 +26,9 @@ class Client
 	private :
 		std::string	_nickname;
 		
-		pollfd		_client_poll;
-
+		
 	public :
+		pollfd		_client_poll;
 		std::string	_username;
 		Client(pollfd client_poll);
 		~Client();

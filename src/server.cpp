@@ -21,21 +21,28 @@ Server::~Server()
 
 void Server::del_from_poll_fds(int client_fd) 
 {
-    std::cout << "Starttt del_from_poll_fds" << std::endl;
     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
         if (it->fd == client_fd) {
-            close(client_fd);
             _poll_fds.erase(it);
             break;
         }
     }
-    std::cout << "ENDDD del_from_poll_fds" << std::endl;
+    for (std::size_t i = 0; i < _clients.size(); i++)
+    {
+        if (_clients[i]->_client_poll.fd == client_fd)
+        {
+            _clients.erase(_clients.begin() + i);
+            close(client_fd);
+            break;
+        }
+    }
+    
+    
 }
 
 
 void Server::accept_new_connection()
 {
-    std::cout << "Startt accept_new_connection" << std::endl;
 
     int client_fd = accept(_server_socket, NULL, NULL);
     if (client_fd == -1) {
@@ -45,6 +52,7 @@ void Server::accept_new_connection()
 
     pollfd tt = {client_fd, POLLIN, 0};
     Client *client = new Client(tt);
+    client->_username = intToString(client_fd);
     _poll_fds.push_back(tt);
     _clients.push_back(client);
 
@@ -55,23 +63,19 @@ void Server::accept_new_connection()
     if (status == -1)
         std::cerr << "[Server] Send error to client " << client_fd << ": " << strerror(errno) << std::endl;
         
-    std::cout << "ENDDD accept_new_connection" << std::endl;
 }
 
 
 void Server::read_data_from_socket(int client_fd)
 {
     char buffer[1024];
-    std::string msg_to_send;
+    std::string msg;
     int status;
     int dest_fd;
-    std::cout << "Starttt read_data_from_socket" << std::endl;
 
     memset(buffer, '\0', 1024);
-    int i = -1;
     while (strchr(buffer, '\n') == NULL)
     {
-        std::cout << "nb tour boucle = " << ++i << std::endl;
         memset(buffer, '\0', 1024);
 
         status = recv(client_fd, buffer, 1024, 0);
@@ -88,30 +92,26 @@ void Server::read_data_from_socket(int client_fd)
             close(client_fd);
             return ;
         }
-        
-        // status == 0 client est parti
 
-        msg_to_send.append(buffer);
-
+        msg.append(buffer);
     }
-    
-    std::cout << "[" << client_fd << "] Got Message: " << msg_to_send << std::endl;
 
-    msg_to_send = intToString(client_fd) + " says: " + msg_to_send;
+    std::cout << "[" << client_fd << "] Got Message: " << msg << std::endl;
+
+    msg = intToString(client_fd) + " says: " + msg;
 
     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
     {
         dest_fd = it->fd;
         if (dest_fd != _server_socket && dest_fd != client_fd) 
         {
-            status = send(dest_fd, msg_to_send.c_str(), msg_to_send.size(), 0);
+            status = send(dest_fd, msg.c_str(), msg.size(), 0);
             
             if (status == -1) 
                 std::cerr << "[Server] Send error to client fd " << dest_fd << ": " << strerror(errno) << std::endl;
         }
         
     }
-    std::cout << "ENDDD read_data_from_socket" << std::endl;
 }
 
 
@@ -147,15 +147,16 @@ void	Server::start()
                 if (it->fd == _server_socket)
                 {
                     this->accept_new_connection();
-                    for (std::vector<Client*>::iterator it2 = _clients.begin(); it2 != _clients.end(); ++it2)
+                    std::cout << "size of _clients " << _clients.size() << std::endl;
+                    std::cout << "size of poll fd " << _poll_fds.size() << std::endl;
+                    for (std::size_t i = 0; i < _clients.size(); ++i)
                     {
-                        std::cout << "Client name: " << (*it2)->_username << std::endl;
+                        std::cout << "Client name: " << _clients[i]->_username << std::endl;
                     }
                     break;
                 }
                 
                 this->read_data_from_socket(it->fd);
-                it->revents = 0;
                 break;
             }
         }
