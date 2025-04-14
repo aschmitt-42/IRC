@@ -68,38 +68,46 @@ void Server::accept_new_connection()
 
 void Server::read_data_from_socket(int client_fd)
 {
-    char buffer[1024];
+    int size = 10;
+    char buffer[size];
     std::string msg;
     int status;
-    int dest_fd;
-
-    memset(buffer, '\0', 1024);
+    
+    // memset(buffer, '\0', size);
+    bzero(buffer, 10);
     while (strchr(buffer, '\n') == NULL)
     {
-        memset(buffer, '\0', 1024);
-
-        status = recv(client_fd, buffer, 1024, 0);
+        // memset(buffer, '\0', size);
+        bzero(buffer, 10);
+        
+        status = recv(client_fd, buffer, size, 0);
         if (status < 0) { // && errno != EWOULDBLOCK
             std::cerr << "[Server] Recv error: " << strerror(errno) << std::endl;
             this->del_from_poll_fds(client_fd);
             close(client_fd);
             return ;
         }
-        if (status == 0)
+        else if (status == 0)
         {
             std::cout << "[Server] Client fd " << client_fd << " disconnected" << std::endl;
             this->del_from_poll_fds(client_fd);
             close(client_fd);
             return ;
         }
-
+        
+        int i = 9;
+        while (buffer[++i])
+        {
+            buffer[i] = 0;
+        }
         msg.append(buffer);
     }
-
+    
     std::cout << "[" << client_fd << "] Got Message: " << msg << std::endl;
-
+    
     msg = intToString(client_fd) + " says: " + msg;
-
+    
+    int dest_fd;
     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
     {
         dest_fd = it->fd;
@@ -147,12 +155,6 @@ void	Server::start()
                 if (it->fd == _server_socket)
                 {
                     this->accept_new_connection();
-                    std::cout << "size of _clients " << _clients.size() << std::endl;
-                    std::cout << "size of poll fd " << _poll_fds.size() << std::endl;
-                    for (std::size_t i = 0; i < _clients.size(); ++i)
-                    {
-                        std::cout << "Client name: " << _clients[i]->_username << std::endl;
-                    }
                     break;
                 }
                 
