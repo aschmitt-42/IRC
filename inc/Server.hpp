@@ -39,7 +39,7 @@ class Server
 		Server(std::string port, std::string password);
 		~Server();
 		void	start();
-		void	del_from_poll_fds(int client_fd) ;
+		void	disconect_client(int client_fd) ;
 };
 
 // std::ostream& operator<<(std::ostream& os, const server& other);

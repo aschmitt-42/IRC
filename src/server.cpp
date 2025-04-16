@@ -1,6 +1,8 @@
 #include "Server.hpp"
 #include "Client.hpp"
 #include "irc.hpp"
+
+
 Server::Server(std::string port, std::string password)
 {
 	_port = port;
@@ -13,13 +15,18 @@ Server::Server(std::string port, std::string password)
     std::cout << "[Server] Listening on port " << _port << std::endl;
 }
 
-Server::~Server()
-{
-	std::cout << "Destructor Server called" << std::endl;
+Server::~Server() 
+{ 
+    for (size_t i = 0; i < _clients.size(); i++)
+    {
+        delete _clients[i];
+    }
+    
+    std::cout << "Destructor Server called" << std::endl; 
 }
 
 
-void Server::del_from_poll_fds(int client_fd) 
+void Server::disconect_client(int client_fd) 
 {
     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
         if (it->fd == client_fd) {
@@ -36,8 +43,7 @@ void Server::del_from_poll_fds(int client_fd)
             break;
         }
     }
-    
-    
+
 }
 
 
@@ -62,7 +68,6 @@ void Server::accept_new_connection()
     int status = send(client_fd, msg.c_str(), msg.size(), 0);
     if (status == -1)
         std::cerr << "[Server] Send error to client " << client_fd << ": " << strerror(errno) << std::endl;
-        
 }
 
 
@@ -73,33 +78,26 @@ void Server::read_data_from_socket(int client_fd)
     std::string msg;
     int status;
     
-    // memset(buffer, '\0', size);
-    bzero(buffer, 10);
+    memset(buffer, 0, size);
     while (strchr(buffer, '\n') == NULL)
     {
-        // memset(buffer, '\0', size);
-        bzero(buffer, 10);
+        memset(buffer, 0, size);
         
         status = recv(client_fd, buffer, size, 0);
         if (status < 0) { // && errno != EWOULDBLOCK
             std::cerr << "[Server] Recv error: " << strerror(errno) << std::endl;
-            this->del_from_poll_fds(client_fd);
+            this->disconect_client(client_fd);
             close(client_fd);
             return ;
         }
         else if (status == 0)
         {
             std::cout << "[Server] Client fd " << client_fd << " disconnected" << std::endl;
-            this->del_from_poll_fds(client_fd);
+            this->disconect_client(client_fd);
             close(client_fd);
             return ;
         }
-        
-        int i = 9;
-        while (buffer[++i])
-        {
-            buffer[i] = 0;
-        }
+        buffer[size] = 0;
         msg.append(buffer);
     }
     
@@ -130,8 +128,8 @@ void	Server::start()
     pollfd server_fd = {_server_socket, POLLIN, 0};
     _poll_fds.push_back(server_fd);
     
-    while (1) {
-        
+    while (1) 
+    {    
         int status = poll(_poll_fds.begin().base(), _poll_fds.size(), -1);
         if (status == -1) {
             std::cerr << "[Server] Poll error: " << strerror(errno) << std::endl;
@@ -144,11 +142,12 @@ void	Server::start()
                 continue;
             }
             
-            if ((it->revents & POLLHUP) == POLLHUP)
-            {
-                this->del_from_poll_fds(it->fd);
-                break;
-            }
+            // if ((it->revents & POLLHUP) == POLLHUP)
+            // {
+            //     this->disconect_client(it->fd);
+            //     std::cout << "POLLHUPPPP" << std::endl;
+            //     break;
+            // }
             
             if ((it->revents & POLLIN) == POLLIN)
             {
@@ -168,6 +167,6 @@ void	Server::start()
 // if (it->revents & POLLERR) {
 //     std::cerr << "[Server] Error on fd: " << it->fd << std::endl;
 //     close(it->fd);
-//     del_from_poll_fds(&_poll_fds, it - _poll_fds.begin(), &_poll_fds.size());
+//     (&_poll_fds, it - _poll_fds.begin(), &_poll_fds.size());
 //     continue;
 // }
