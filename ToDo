@@ -5,13 +5,13 @@
     - [ ] tableau de fd descriptor
     - [ ] ....
 
-[ ] creer class client:
+[X] creer class client:
     - [ ] 
 
 [ ] creer class chanells:
     - [ ] 
 
-[ ] message plus long que buffer size caractere non imprimable:
+[X] message plus long que buffer size caractere non imprimable:
 
 [X] gerer les deconnexion
 
@@ -20,3 +20,5 @@
     - [ ] POLLHUP
     - [ ] POLLIN
     - [ ] ...
+
+[ ] CTRL+D avec plusieur client en meme temp

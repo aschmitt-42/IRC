@@ -18,7 +18,7 @@ int main(int argc, char **argv)
         std::cerr << "Usage: ./ircserv port password" << std::endl;
         return 1; 
     }
-
+    
     verif_port(argv[1]);
     Server irc(argv[1], argv[2]);
 

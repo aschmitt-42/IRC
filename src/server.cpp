@@ -26,7 +26,7 @@ Server::~Server()
 }
 
 
-void Server::disconect_client(int client_fd) 
+void Server::disconect_client(int client_fd)
 {
     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
         if (it->fd == client_fd) {
@@ -58,6 +58,7 @@ void Server::accept_new_connection()
 
     pollfd tt = {client_fd, POLLIN, 0};
     Client *client = new Client(tt);
+
     client->_username = intToString(client_fd);
     _poll_fds.push_back(tt);
     _clients.push_back(client);
@@ -116,7 +117,6 @@ void Server::read_data_from_socket(int client_fd)
             if (status == -1) 
                 std::cerr << "[Server] Send error to client fd " << dest_fd << ": " << strerror(errno) << std::endl;
         }
-        
     }
 }
 
@@ -131,6 +131,7 @@ void	Server::start()
     while (1) 
     {    
         int status = poll(_poll_fds.begin().base(), _poll_fds.size(), -1);
+
         if (status == -1) {
             std::cerr << "[Server] Poll error: " << strerror(errno) << std::endl;
             exit(1);

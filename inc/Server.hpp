@@ -25,10 +25,10 @@
 class Server
 {
 	private :
-		int					_server_socket;
-		std::string			_port;
-		std::string			_password;
-		std::vector<pollfd>	_poll_fds;		// Tableau des descripteur
+		int						_server_socket;
+		std::string				_port;
+		std::string				_password;
+		std::vector<pollfd>		_poll_fds;		// Tableau des descripteur
 		std::vector<Client*>	_clients;	// Tableau des clients
 
 
