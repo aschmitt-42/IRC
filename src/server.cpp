@@ -106,18 +106,19 @@ void Server::read_data_from_socket(int client_fd)
     
     msg = intToString(client_fd) + " says: " + msg;
     
-    int dest_fd;
-    for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-    {
-        dest_fd = it->fd;
-        if (dest_fd != _server_socket && dest_fd != client_fd) 
-        {
-            status = send(dest_fd, msg.c_str(), msg.size(), 0);
+    // int dest_fd;
+    // for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+    // {
+    //     dest_fd = it->fd;
+    //     if (dest_fd != _server_socket && dest_fd != client_fd) 
+    //     {
+    //         status = send(dest_fd, msg.c_str(), msg.size(), 0);
             
-            if (status == -1) 
-                std::cerr << "[Server] Send error to client fd " << dest_fd << ": " << strerror(errno) << std::endl;
-        }
-    }
+    //         if (status == -1) 
+    //             std::cerr << "[Server] Send error to client fd " << dest_fd << ": " << strerror(errno) << std::endl;
+    //     }
+    // }
+    IRC_Parser(msg, client);
 }
 
 
