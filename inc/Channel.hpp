@@ -25,9 +25,6 @@
 class Channel
 {
 	private :
-		std::string	_Channel_Name;
-		std::string	_client_name;
-		pollfd		_client_poll;
 		std::vector<Client>	_client;	
 	public :
 		Channel();
