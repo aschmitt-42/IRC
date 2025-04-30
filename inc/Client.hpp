@@ -25,13 +25,16 @@ class Client
 {
 	private :
 		std::string	_nickname;
-		
+		int			_operator;
 		
 	public :
 		pollfd		_client_poll;
 		std::string	_username;
 		Client(pollfd client_poll);
 		~Client();
+
+		//GETTER
+		pollfd	GET_Pollfd(){return _client_poll;}
 };
 
 // std::ostream& operator<<(std::ostream& os, const Client& other);

@@ -19,8 +19,13 @@
 # include <sys/poll.h>
 # include <sys/socket.h>
 # include <sstream>
+# include "Client.hpp"
+# include "Server.hpp"
+# include "Channel.hpp"
 
 
 std::string intToString(int number);
+void IRC_Parser(std::string msg, Server *serv, Client *client);
+
 
 #endif

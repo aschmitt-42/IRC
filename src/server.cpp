@@ -101,24 +101,31 @@ void Server::read_data_from_socket(int client_fd)
         buffer[size] = 0;
         msg.append(buffer);
     }
+    //std::cout << "[" << client_fd << "] Got Message: " << msg << std::endl;
     
-    std::cout << "[" << client_fd << "] Got Message: " << msg << std::endl;
-    
-    msg = intToString(client_fd) + " says: " + msg;
-    
-    // int dest_fd;
-    // for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-    // {
-    //     dest_fd = it->fd;
-    //     if (dest_fd != _server_socket && dest_fd != client_fd) 
-    //     {
-    //         status = send(dest_fd, msg.c_str(), msg.size(), 0);
+    int dest_fd;
+    for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+    {
+        dest_fd = it->fd;
+        if (dest_fd != _server_socket && dest_fd != client_fd) 
+        {
+            status = send(dest_fd, msg.c_str(), msg.size(), 0);
             
-    //         if (status == -1) 
-    //             std::cerr << "[Server] Send error to client fd " << dest_fd << ": " << strerror(errno) << std::endl;
-    //     }
-    // }
-    IRC_Parser(msg, client);
+            if (status == -1) 
+                std::cerr << "[Server] Send error to client fd " << dest_fd << ": " << strerror(errno) << std::endl;
+        }
+    }
+    IRC_Parser(msg, this, FINDING_Client(client_fd));
+}
+
+Client* Server::FINDING_Client(int client_fd)
+{
+    for (size_t i = 0; i < _clients.size(); ++i)
+    {
+        if (_clients[i]->GET_Pollfd().fd == client_fd)
+            return _clients[i];
+    }
+    return NULL;
 }
 
 
@@ -172,3 +179,27 @@ void	Server::start()
 //     (&_poll_fds, it - _poll_fds.begin(), &_poll_fds.size());
 //     continue;
 // }
+
+
+//COMMAND
+
+void Server::JOIN()
+{
+    std::cout << "JOIN DETECTED" << std::endl;
+}
+void Server::KICK()
+{
+    std::cout << "KICK DETECTED" << std::endl;
+}
+void Server::INVITE()
+{
+    std::cout << "INVITE DETECTED" << std::endl;
+}
+void Server::TOPIC()
+{
+    std::cout << "TOPIC DETECTED" << std::endl;
+}
+void Server::MODE()
+{
+    std::cout << "MODE DETECTED" << std::endl;
+}

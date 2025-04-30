@@ -1,8 +1,8 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include "irc.hpp"
 # include "Client.hpp"
+# include "Channel.hpp"
 # include <iostream>
 # include <fstream>
 # include <string>
@@ -30,7 +30,7 @@ class Server
 		std::string				_password;
 		std::vector<pollfd>		_poll_fds;		// Tableau des descripteur
 		std::vector<Client*>	_clients;	// Tableau des clients
-
+		std::vector<Channel*>	_channel;
 
 		void read_data_from_socket(int clien_fd);
 		void accept_new_connection();
@@ -39,7 +39,19 @@ class Server
 		Server(std::string port, std::string password);
 		~Server();
 		void	start();
-		void	disconect_client(int client_fd) ;
+		void	disconect_client(int client_fd);
+		Client* FINDING_Client(int client_fd);
+
+		//GETTER
+		std::vector<Channel*>	GET_Channel(){return _channel;}
+		std::vector<Client*>	GET_Client(){return _clients;}
+		std::vector<pollfd>		GET_Pollfd(){return _poll_fds;}
+
+		void JOIN();
+		void KICK();
+		void INVITE();
+		void TOPIC();
+		void MODE();
 };
 
 // std::ostream& operator<<(std::ostream& os, const server& other);

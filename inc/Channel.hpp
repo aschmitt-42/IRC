@@ -19,17 +19,19 @@
 # include <sys/poll.h>
 # include <sys/socket.h>
 # include <vector>
+# include "Client.hpp"
 
 
 class Channel
 {
 	private :
 		std::string	_Channel_Name;
-	public :
+		std::string	_client_name;
 		pollfd		_client_poll;
-		std::string	_username;
-		Client(pollfd client_poll);
-		~Client();
+		std::vector<Client>	_client;	
+	public :
+		Channel();
+		~Channel();
 };
 
 // std::ostream& operator<<(std::ostream& os, const Client& other);
