@@ -25,10 +25,19 @@
 class Channel
 {
 	private :
-		std::vector<Client>	_client;	
+		std::vector<Client*>	_client;
+		std::string			_name;
+		std::string			_topic;	
 	public :
-		Channel();
+		Channel(std::string channel_name, std::string topic);
 		~Channel();
+
+		void	ADD_User(Client *client);
+		void	SEND_Msg(std::string msg, Client *client);
+		void	DELETE_User(){}
+
+		//GETTER
+		std::string	GET_Topic(){return _topic;}
 };
 
 // std::ostream& operator<<(std::ostream& os, const Client& other);

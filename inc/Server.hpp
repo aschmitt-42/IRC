@@ -30,7 +30,7 @@ class Server
 		std::string				_password;
 		std::vector<pollfd>		_poll_fds;		// Tableau des descripteur
 		std::vector<Client*>	_clients;	// Tableau des clients
-		std::vector<Channel*>	_channel;
+		std::vector<Channel*>	_channels;
 
 		void read_data_from_socket(int clien_fd);
 		void accept_new_connection();
@@ -43,14 +43,14 @@ class Server
 		Client* FINDING_Client(int client_fd);
 
 		//GETTER
-		std::vector<Channel*>	GET_Channel(){return _channel;}
+		std::vector<Channel*>	GET_Channel(){return _channels;}
 		std::vector<Client*>	GET_Client(){return _clients;}
 		std::vector<pollfd>		GET_Pollfd(){return _poll_fds;}
 
-		void JOIN();
+		void JOIN(Client *user, std::string channel_name);
 		void KICK();
 		void INVITE();
-		void TOPIC();
+		void TOPIC(Client *client);
 		void MODE();
 };
 

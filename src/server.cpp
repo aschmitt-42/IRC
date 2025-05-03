@@ -57,15 +57,15 @@ void Server::accept_new_connection()
     }
 
     pollfd tt = {client_fd, POLLIN, 0};
-    Client *client = new Client(tt);
+    Client *client = new Client(tt, client_fd);
 
-    client->_username = intToString(client_fd);
+    //->REGISTRATION();
     _poll_fds.push_back(tt);
     _clients.push_back(client);
 
     std::cout << "[Server] New client connected on fd " << client_fd << std::endl;
 
-    std::string msg = "Welcome. You are client fd [" + intToString(client_fd) + "]\n";
+    std::string msg = "Welcome. You are client " + client->GET_Username() + " " + client->GET_Nickname() + "\n";
     int status = send(client_fd, msg.c_str(), msg.size(), 0);
     if (status == -1)
         std::cerr << "[Server] Send error to client " << client_fd << ": " << strerror(errno) << std::endl;
@@ -183,9 +183,14 @@ void	Server::start()
 
 //COMMAND
 
-void Server::JOIN()
+void Server::JOIN(Client *user, std::string channel_name)
 {
     std::cout << "JOIN DETECTED" << std::endl;
+    std::string topic_name = "No topic\n";
+    Channel *channel = new Channel(channel_name, topic_name);
+    channel->ADD_User(user);
+    user->JOIN_Channel(channel);
+    _channels.push_back(channel);
 }
 void Server::KICK()
 {
@@ -195,9 +200,13 @@ void Server::INVITE()
 {
     std::cout << "INVITE DETECTED" << std::endl;
 }
-void Server::TOPIC()
+void Server::TOPIC(Client *client)
 {
     std::cout << "TOPIC DETECTED" << std::endl;
+    int status;
+    std::string msg = client->GET_Channel()->GET_Topic();
+    status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+    (void)status;
 }
 void Server::MODE()
 {
