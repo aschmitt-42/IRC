@@ -24,6 +24,19 @@ std::string CMD_Finder(std::string msg)
 	return cmd;
 }
 
+std::string ARG_Finder(std::string msg)
+{
+    std::istringstream stream(msg);
+    std::string word;
+
+    stream >> word;
+
+    if (stream >> word)
+        return word;
+	else 
+        return "";
+}
+
 void PRINT_Msg(std::string msg, Server *serv, Client *client)
 {
 	if (client->GET_Channel())
@@ -41,19 +54,23 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 
 	std::string cmd = CMD_Finder(msg);
 	//std::cout << "MSG : " << msg << "CMD : " << cmd << std::endl;
-
 	if (cmd.empty())
+	{
 		PRINT_Msg(msg, serv, client);
-	else if (cmd == "JOIN")
-		serv->JOIN(client , "test");
+		return;
+	}
+
+	std::string	argument = ARG_Finder(msg);
+	if (cmd == "JOIN")
+		serv->JOIN(client, argument);
 	else if (cmd == "KICK")
-		serv->KICK();
+		serv->KICK(client, argument);
 	else if (cmd == "INVITE")
-		serv->INVITE();
+		serv->INVITE(client, argument);
 	else if (cmd == "TOPIC")
-		serv->TOPIC(client);
+		serv->TOPIC(client, argument);
 	else if (cmd == "MODE")
-		serv->MODE();
+		serv->MODE(client, argument);
 	else
 		std::cout << "WTFFF" << std::endl;
 }

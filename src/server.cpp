@@ -189,26 +189,42 @@ void Server::JOIN(Client *user, std::string channel_name)
     std::string topic_name = "No topic\n";
     Channel *channel = new Channel(channel_name, topic_name);
     channel->ADD_User(user);
-    user->JOIN_Channel(channel);
     _channels.push_back(channel);
 }
-void Server::KICK()
+void Server::KICK(Client *client, std::string argument)
 {
-    std::cout << "KICK DETECTED" << std::endl;
+    std::cout << "KICK DETECTED ON " << argument << std::endl;
+    if (!client->IS_Operator())
+        return;
 }
-void Server::INVITE()
+void Server::INVITE(Client *client, std::string argument)
 {
-    std::cout << "INVITE DETECTED" << std::endl;
+    std::cout << "INVITE DETECTED ON " << argument << std::endl;
+    if (!client->IS_Operator())
+        return;
 }
-void Server::TOPIC(Client *client)
+void Server::TOPIC(Client *client, std::string argument)
 {
     std::cout << "TOPIC DETECTED" << std::endl;
+    if (!client->IS_Operator())
+        return;
+    std::string msg;
     int status;
-    std::string msg = client->GET_Channel()->GET_Topic();
-    status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+    if (client->GET_Channel())
+    {
+        msg = client->GET_Channel()->GET_Topic();
+        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+    }
+    else
+    {
+        msg = "No channel joined yet";
+        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+    }
     (void)status;
 }
-void Server::MODE()
+void Server::MODE(Client *client, std::string argument)
 {
-    std::cout << "MODE DETECTED" << std::endl;
+    std::cout << "MODE " << argument << " DETECTED" << std::endl;
+    if (!client->IS_Operator())
+        return;
 }

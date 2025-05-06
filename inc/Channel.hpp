@@ -34,7 +34,7 @@ class Channel
 
 		void	ADD_User(Client *client);
 		void	SEND_Msg(std::string msg, Client *client);
-		void	DELETE_User(){}
+		void	DELETE_User(Client *client);
 
 		//GETTER
 		std::string	GET_Topic(){return _topic;}

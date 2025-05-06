@@ -3,6 +3,7 @@
 
 Client::Client(pollfd client_poll, int client_fd) : _operator(0),_client_poll(client_poll)
 {
+	(void)_operator;
 	char buffer[1024] = {0};
 	int status;
 	std::string msg;
@@ -14,7 +15,7 @@ Client::Client(pollfd client_poll, int client_fd) : _operator(0),_client_poll(cl
     ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
     if (bytes_read > 0) 
 	{
-        buffer[bytes_read] = '\0';  // null-terminate
+        buffer[bytes_read -1] = '\0';  // null-terminate
         _username = buffer;
         //std::cout << "Utilisateur connecté : " << username << std::endl;
 	}   
@@ -26,7 +27,7 @@ Client::Client(pollfd client_poll, int client_fd) : _operator(0),_client_poll(cl
     bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
     if (bytes_read > 0) 
 	{
-        buffer[bytes_read] = '\0';  // null-terminate
+        buffer[bytes_read - 1] = '\0';  // null-terminate
         _nickname = buffer;
     } 
 	else 

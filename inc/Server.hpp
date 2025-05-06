@@ -48,10 +48,10 @@ class Server
 		std::vector<pollfd>		GET_Pollfd(){return _poll_fds;}
 
 		void JOIN(Client *user, std::string channel_name);
-		void KICK();
-		void INVITE();
-		void TOPIC(Client *client);
-		void MODE();
+		void KICK(Client *client, std::string argument);
+		void INVITE(Client *client, std::string argument);
+		void TOPIC(Client *client, std::string argument);
+		void MODE(Client *client, std::string argument);
 };
 
 // std::ostream& operator<<(std::ostream& os, const server& other);

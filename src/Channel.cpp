@@ -15,7 +15,18 @@ Channel::~Channel(){}
 void	Channel::ADD_User(Client *client)
 {
 	_client.push_back(client);
+	client->JOIN_Channel(this);
 }
+
+void	Channel::DELETE_User(Client *client)
+{
+	for (size_t	i = 0; i < _client.size(); ++i)
+	{
+		if (_client[i] == client)
+			_client.erase(_client.begin() + i);
+	}
+}
+
 void	Channel::SEND_Msg(std::string msg, Client *client)
 {
 	int status;
