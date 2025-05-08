@@ -1,6 +1,5 @@
 #include "Server.hpp"
 #include "Client.hpp"
-#include "irc.hpp"
 #include "Channel.hpp"
 
 Channel::Channel(std::string channel_name, std::string topic_name)

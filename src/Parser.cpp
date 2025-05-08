@@ -1,6 +1,5 @@
 #include "Server.hpp"
 #include "Client.hpp"
-#include "irc.hpp"
 
 std::string CMD_Finder(std::string msg)
 {

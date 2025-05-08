@@ -1,7 +1,5 @@
 #include "Server.hpp"
 #include "Client.hpp"
-#include "irc.hpp"
-
 
 Server::Server(std::string port, std::string password)
 {
@@ -26,24 +24,24 @@ Server::~Server()
 }
 
 
-void Server::disconect_client(int client_fd)
+void Server::disconect_client(Client *client)
 {
     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
-        if (it->fd == client_fd) {
+        if (it->fd == client->GET_Client_Fd()) {
             _poll_fds.erase(it);
             break;
         }
     }
-    for (std::size_t i = 0; i < _clients.size(); i++)
-    {
-        if (_clients[i]->_client_poll.fd == client_fd)
+
+    for (std::size_t i = 0; i < _clients.size(); i++){
+        if (_clients[i]->_client_poll.fd == client->GET_Client_Fd())
         {
+            // maybe close de fd
+            close(client->GET_Client_Fd());
             _clients.erase(_clients.begin() + i);
-            close(client_fd);
             break;
         }
     }
-
 }
 
 
@@ -72,50 +70,47 @@ void Server::accept_new_connection()
 }
 
 
-void Server::read_data_from_socket(int client_fd)
+void Server::read_data_from_socket(Client *client)
 {
-    int size = 10;
-    char buffer[size];
-    std::string msg;
-    int status;
+    char buffer[1024];
     
-    memset(buffer, 0, size);
-    while (strchr(buffer, '\n') == NULL)
-    {
-        memset(buffer, 0, size);
-        
-        status = recv(client_fd, buffer, size, 0);
-        if (status < 0) { // && errno != EWOULDBLOCK
-            std::cerr << "[Server] Recv error: " << strerror(errno) << std::endl;
-            this->disconect_client(client_fd);
-            close(client_fd);
-            return ;
-        }
-        else if (status == 0)
-        {
-            std::cout << "[Server] Client fd " << client_fd << " disconnected" << std::endl;
-            this->disconect_client(client_fd);
-            close(client_fd);
-            return ;
-        }
-        buffer[size] = 0;
-        msg.append(buffer);
+    int bytes_read = recv(client->GET_Client_Fd(), buffer, sizeof(buffer) - 1, 0);
+    if (bytes_read < 0) { // && errno != EWOULDBLOCK
+        std::cerr << "[Server] Recv error: " << strerror(errno) << std::endl;
+        this->disconect_client(client);
+        return ;
     }
-    //std::cout << "[" << client_fd << "] Got Message: " << msg << std::endl;
+
+    if (bytes_read == 0){
+        std::cout << "[Server] " << client->GET_Nickname() << ", client fd " << client->GET_Client_Fd() << " disconnected" << std::endl;
+        this->disconect_client(client);
+        return ;
+    }
     
-    //int dest_fd;
-    // for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-    // {
-    //     dest_fd = it->fd;
-    //     if (dest_fd != _server_socket && dest_fd != client_fd) 
-    //     {
-    //         status = send(dest_fd, msg.c_str(), msg.size(), 0);
-            
-    //         if (status == -1) 
-    //             std::cerr << "[Server] Send error to client fd " << dest_fd << ": " << strerror(errno) << std::endl;
-    //     }
-    // }
-    IRC_Parser(msg, this, FINDING_Client_fd(client_fd));
+    buffer[bytes_read] = 0;
+
+    std::string& msg = client->GET_Message();
+    msg.append(buffer);
+
+    
+    size_t position = msg.find('\n');
+
+    if (position == std::string::npos){
+        return;
+    }
+    std::string cmd = msg.substr(0, position);
+
+    ++position;
+
+    if (position < msg.length()) {
+        msg = msg.erase(0, position);
+    } else {
+        // Si la position est au-delà de la longueur de la chaîne, la chaîne devient vide
+        msg.clear();
+    }
+
+    // IRC_Parser(msg, this, client);
+
 }
 
 Client* Server::FINDING_Client_fd(int client_fd)
@@ -146,28 +141,22 @@ void	Server::start()
 
     pollfd server_fd = {_server_socket, POLLIN, 0};
     _poll_fds.push_back(server_fd);
-    
     while (1) 
     {    
         int status = poll(_poll_fds.begin().base(), _poll_fds.size(), -1);
-
+        
         if (status == -1) {
             std::cerr << "[Server] Poll error: " << strerror(errno) << std::endl;
             exit(1);
         }
         
+        Client *client;
+
         for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) 
         {
             if (it->revents == 0){
                 continue;
             }
-            
-            // if ((it->revents & POLLHUP) == POLLHUP)
-            // {
-            //     this->disconect_client(it->fd);
-            //     std::cout << "POLLHUPPPP" << std::endl;
-            //     break;
-            // }
             
             if ((it->revents & POLLIN) == POLLIN)
             {
@@ -176,8 +165,8 @@ void	Server::start()
                     this->accept_new_connection();
                     break;
                 }
-                
-                this->read_data_from_socket(it->fd);
+                client = FINDING_Client_fd(it->fd);
+                this->read_data_from_socket(client);
                 break;
             }
         }
@@ -192,7 +181,9 @@ void	Server::start()
 // }
 
 
-//COMMAND
+/*//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    COMMANDE
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 Channel *Server::CHANNEL_Exist(std::string channel_name)
 {

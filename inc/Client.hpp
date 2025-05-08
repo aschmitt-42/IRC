@@ -29,6 +29,8 @@ class Client
 		int			_operator;
 		Channel		*_channel;
 		int			_client_fd;
+		std::string	_msg;
+		
 	public :
 		pollfd		_client_poll;
 		std::string	_username;
@@ -40,12 +42,13 @@ class Client
 		void	OPERATOR(){_operator = 1;}
 
 		//GETTER
-		pollfd		GET_Pollfd(){return _client_poll;}
-		std::string	GET_Nickname(){return _nickname;}
-		std::string	GET_Username(){return _username;}
-		Channel		*GET_Channel(){return _channel;}
-		int			GET_Client_Fd(){return _client_fd;}
-		int			IS_Operator(){return _operator;}
+		pollfd			GET_Pollfd(){return _client_poll;}
+		std::string		GET_Nickname(){return _nickname;}
+		std::string		GET_Username(){return _username;}
+		std::string&	GET_Message(){return _msg;}
+		Channel			*GET_Channel(){return _channel;}
+		int				GET_Client_Fd(){return _client_fd;}
+		int				IS_Operator(){return _operator;}
 
 };
 
