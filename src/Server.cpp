@@ -91,25 +91,45 @@ void Server::read_data_from_socket(Client *client)
 
     std::string& msg = client->GET_Message();
     msg.append(buffer);
+    
+    while (!msg.empty()) {
+        size_t position = msg.find('\n');
+    
+        if (position == std::string::npos) {
+            return;
+        }
+    
+        std::string cmd(msg.c_str(), position);
+        std::cout << "size cmd : " << cmd.size() << " : " << cmd << std::endl;
+        // IRC_Parser(msg, this, client);
+    
+        msg.erase(0, position + 1);
+    }
+
+    // int continu = 0;
+    // do {
+    //     size_t position = msg.find('\n');
+
+    //     if (position == std::string::npos){
+    //         return;
+    //     }
+    //     std::string cmd(msg.c_str(), position);
+    //     std::cout << cmd << std::endl;
+    //     // IRC_Parser(msg, this, client);
+
+    //     ++position;
+
+    //     if (position < msg.length()){
+    //         continu = 1;
+    //         msg = msg.erase(0, position);
+    //     }
+    //     else
+    //         continu = 0;
+
+    // } while (continu);
+    // msg.clear();
 
     
-    size_t position = msg.find('\n');
-
-    if (position == std::string::npos){
-        return;
-    }
-    std::string cmd = msg.substr(0, position);
-
-    ++position;
-
-    if (position < msg.length()) {
-        msg = msg.erase(0, position);
-    } else {
-        // Si la position est au-delà de la longueur de la chaîne, la chaîne devient vide
-        msg.clear();
-    }
-
-    // IRC_Parser(msg, this, client);
 
 }
 
