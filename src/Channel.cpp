@@ -23,7 +23,10 @@ void	Channel::DELETE_User(Client *client)
 	for (size_t	i = 0; i < _client.size(); ++i)
 	{
 		if (_client[i] == client)
+		{
 			_client.erase(_client.begin() + i);
+			client->DELETE_Channel();
+		}
 	}
 }
 

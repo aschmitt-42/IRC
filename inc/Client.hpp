@@ -35,7 +35,9 @@ class Client
 		Client(pollfd client_poll, int client_fd);
 		~Client();
 
-		void JOIN_Channel(Channel *channel){_channel = channel;}
+		void	JOIN_Channel(Channel *channel){_channel = channel;}
+		void	DELETE_Channel(){_channel = NULL;}
+		void	OPERATOR(){_operator = 1;}
 
 		//GETTER
 		pollfd		GET_Pollfd(){return _client_poll;}
@@ -43,6 +45,8 @@ class Client
 		std::string	GET_Username(){return _username;}
 		Channel		*GET_Channel(){return _channel;}
 		int			GET_Client_Fd(){return _client_fd;}
+		int			IS_Operator(){return _operator;}
+
 };
 
 // std::ostream& operator<<(std::ostream& os, const Client& other);

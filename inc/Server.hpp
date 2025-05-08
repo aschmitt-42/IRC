@@ -40,18 +40,21 @@ class Server
 		~Server();
 		void	start();
 		void	disconect_client(int client_fd);
-		Client* FINDING_Client(int client_fd);
+		Client* FINDING_Client_fd(int client_fd);
+		Client* FINDING_Client_str(std::string username);
 
 		//GETTER
 		std::vector<Channel*>	GET_Channel(){return _channels;}
 		std::vector<Client*>	GET_Client(){return _clients;}
 		std::vector<pollfd>		GET_Pollfd(){return _poll_fds;}
 
+		//command
 		void JOIN(Client *user, std::string channel_name);
 		void KICK(Client *client, std::string argument);
 		void INVITE(Client *client, std::string argument);
 		void TOPIC(Client *client, std::string argument);
 		void MODE(Client *client, std::string argument);
+		Channel	*CHANNEL_Exist(std::string channel_name);
 };
 
 // std::ostream& operator<<(std::ostream& os, const server& other);

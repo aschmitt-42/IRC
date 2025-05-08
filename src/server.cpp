@@ -103,26 +103,37 @@ void Server::read_data_from_socket(int client_fd)
     }
     //std::cout << "[" << client_fd << "] Got Message: " << msg << std::endl;
     
-    int dest_fd;
-    for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-    {
-        dest_fd = it->fd;
-        if (dest_fd != _server_socket && dest_fd != client_fd) 
-        {
-            status = send(dest_fd, msg.c_str(), msg.size(), 0);
+    //int dest_fd;
+    // for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+    // {
+    //     dest_fd = it->fd;
+    //     if (dest_fd != _server_socket && dest_fd != client_fd) 
+    //     {
+    //         status = send(dest_fd, msg.c_str(), msg.size(), 0);
             
-            if (status == -1) 
-                std::cerr << "[Server] Send error to client fd " << dest_fd << ": " << strerror(errno) << std::endl;
-        }
-    }
-    IRC_Parser(msg, this, FINDING_Client(client_fd));
+    //         if (status == -1) 
+    //             std::cerr << "[Server] Send error to client fd " << dest_fd << ": " << strerror(errno) << std::endl;
+    //     }
+    // }
+    IRC_Parser(msg, this, FINDING_Client_fd(client_fd));
 }
 
-Client* Server::FINDING_Client(int client_fd)
+Client* Server::FINDING_Client_fd(int client_fd)
 {
     for (size_t i = 0; i < _clients.size(); ++i)
     {
         if (_clients[i]->GET_Pollfd().fd == client_fd)
+            return _clients[i];
+    }
+    return NULL;
+}
+
+
+Client* Server::FINDING_Client_str(std::string  username)
+{
+    for (size_t i = 0; i < _clients.size(); ++i)
+    {
+        if (_clients[i]->GET_Username() == username)
             return _clients[i];
     }
     return NULL;
@@ -183,19 +194,82 @@ void	Server::start()
 
 //COMMAND
 
+Channel *Server::CHANNEL_Exist(std::string channel_name)
+{
+    for (size_t i = 0; i < _channels.size(); ++i)
+    {
+        if (_channels[i]->GET_Name() == channel_name)
+            return _channels[i];
+    }
+    return NULL;
+}
+
 void Server::JOIN(Client *user, std::string channel_name)
 {
     std::cout << "JOIN DETECTED" << std::endl;
-    std::string topic_name = "No topic\n";
-    Channel *channel = new Channel(channel_name, topic_name);
-    channel->ADD_User(user);
-    _channels.push_back(channel);
+    std::string msg;
+    int status;
+
+    if (channel_name.empty())
+    {
+        std::cerr << "No channel specified" << std::endl;
+        return;
+    }
+
+    Channel *channel = CHANNEL_Exist(channel_name);
+    if (!channel)
+    {
+        std::string topic = "No topic\n";
+        channel = new Channel(channel_name, topic);
+        _channels.push_back(channel);
+        msg = "You created " + channel_name + " and you are now an administrator\n";
+        status = send(user->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        user->OPERATOR();
+    }
+    if (user->GET_Channel() != channel)
+    {
+        std::cout << "Channel " << channel_name << " joined by " << user->GET_Username() << std::endl;
+        channel->ADD_User(user);
+        msg = "You Joined " + channel_name + "\n";
+        status = send(user->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+    }
+    else
+    {
+        std::cout << user->GET_Username() << " already joined " << channel->GET_Name() << std::endl;
+        msg = "You already joined " + channel_name + "\n";
+        status = send(user->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+    }
+   (void)status;
 }
 void Server::KICK(Client *client, std::string argument)
 {
     std::cout << "KICK DETECTED ON " << argument << std::endl;
+    std::string msg;
+    int status;
+
     if (!client->IS_Operator())
         return;
+    Client *kicked_user = FINDING_Client_str(argument);
+    if (kicked_user && kicked_user->GET_Channel() == client->GET_Channel())
+    {
+        kicked_user->GET_Channel()->DELETE_User(kicked_user);
+        msg = "Client " + kicked_user->GET_Username() + " has benn kicked of the " + client->GET_Channel()->GET_Name() + " channel\n";
+        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        msg = "You have been kickend from " + client->GET_Channel()->GET_Name() + " by " + client->GET_Username() + "\n";
+        status = send(kicked_user->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+    }
+    else if (kicked_user && kicked_user->GET_Channel() != client->GET_Channel())
+    {
+        msg = "Client " + kicked_user->GET_Username() + " is not in your channel " + client->GET_Channel()->GET_Name() + "\n";
+        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+    }
+    else
+    {
+        msg = "No client " + argument + " found\n";
+        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+    }
+    (void)status;
+    (void)kicked_user;
 }
 void Server::INVITE(Client *client, std::string argument)
 {
@@ -205,22 +279,32 @@ void Server::INVITE(Client *client, std::string argument)
 }
 void Server::TOPIC(Client *client, std::string argument)
 {
-    std::cout << "TOPIC DETECTED" << std::endl;
-    if (!client->IS_Operator())
-        return;
+    std::cout << "TOPIC DETECTED" << std::endl;;
     std::string msg;
     int status;
-    if (client->GET_Channel())
+    if (client->GET_Channel() && argument.empty())
     {
         msg = client->GET_Channel()->GET_Topic();
         status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
     }
+    else if (argument.empty())
+    {
+        msg = "No channel joined yet\n";
+        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+    }
+    else if  (!client->IS_Operator())
+    {
+        msg = "You are not habilited to change the topic of this channe\n";
+        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+    }
     else
     {
-        msg = "No channel joined yet";
+        client->GET_Channel()->SET_Topic(argument);
+        msg = "Topic successfully changed !\n";
         status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
     }
     (void)status;
+    (void)argument;
 }
 void Server::MODE(Client *client, std::string argument)
 {

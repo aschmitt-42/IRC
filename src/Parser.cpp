@@ -56,6 +56,7 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 	//std::cout << "MSG : " << msg << "CMD : " << cmd << std::endl;
 	if (cmd.empty())
 	{
+		std::cout << "cmd empty\n" <<std::endl;
 		PRINT_Msg(msg, serv, client);
 		return;
 	}

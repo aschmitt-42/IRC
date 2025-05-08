@@ -38,6 +38,9 @@ class Channel
 
 		//GETTER
 		std::string	GET_Topic(){return _topic;}
+		std::string	GET_Name(){return _name;}
+
+		void		SET_Topic(std::string new_topic){_topic = new_topic;}
 };
 
 // std::ostream& operator<<(std::ostream& os, const Client& other);
