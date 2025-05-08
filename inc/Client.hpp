@@ -20,18 +20,36 @@
 # include <sys/socket.h>
 # include <vector>
 
+class Channel;
 
 class Client
 {
 	private :
 		std::string	_nickname;
-		
+		int			_operator;
+		Channel		*_channel;
+		int			_client_fd;
+		std::string	_msg;
 		
 	public :
 		pollfd		_client_poll;
 		std::string	_username;
-		Client(pollfd client_poll);
+		Client(pollfd client_poll, int client_fd);
 		~Client();
+
+		void	JOIN_Channel(Channel *channel){_channel = channel;}
+		void	DELETE_Channel(){_channel = NULL;}
+		void	OPERATOR(){_operator = 1;}
+
+		//GETTER
+		pollfd			GET_Pollfd(){return _client_poll;}
+		std::string		GET_Nickname(){return _nickname;}
+		std::string		GET_Username(){return _username;}
+		std::string&	GET_Message(){return _msg;}
+		Channel			*GET_Channel(){return _channel;}
+		int				GET_Client_Fd(){return _client_fd;}
+		int				IS_Operator(){return _operator;}
+
 };
 
 // std::ostream& operator<<(std::ostream& os, const Client& other);
