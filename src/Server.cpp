@@ -100,7 +100,13 @@ void Server::read_data_from_socket(Client *client)
         }
     
         std::string cmd(msg.c_str(), position);
+        if (cmd[cmd.size() - 1] == '\r')
+            cmd.erase(cmd.size() - 1);
         std::cout << "size cmd : " << cmd.size() << " : " << cmd << std::endl;
+        if (cmd.compare("JOIN #test") == 0)
+        {
+            std::cout << "JOIN #test detected" << std::endl;
+        }
         // IRC_Parser(msg, this, client);
     
         msg.erase(0, position + 1);
