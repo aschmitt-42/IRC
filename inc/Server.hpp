@@ -49,11 +49,12 @@ class Server
 		Client* FINDING_Client_str(std::string username);
 
 		//GETTER
-		std::vector<Channel*>	GET_Channel(){return _channels;}
+		std::vector<Channel*>	get_channel(){return _channels;}
 		std::vector<Client*>	GET_Client(){return _clients;}
-		std::vector<pollfd>		GET_Pollfd(){return _poll_fds;}
+		std::vector<pollfd>		get_pollfd(){return _poll_fds;}
 
 		//command
+		void PASS(Client *client, std::string argument);
 		void JOIN(Client *user, std::string channel_name);
 		void KICK(Client *client, std::string argument);
 		void INVITE(Client *client, std::string argument);

@@ -27,17 +27,17 @@ Server::~Server()
 void Server::disconect_client(Client *client)
 {
     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
-        if (it->fd == client->GET_Client_Fd()) {
+        if (it->fd == client->get_clientfd()) {
             _poll_fds.erase(it);
             break;
         }
     }
 
     for (std::size_t i = 0; i < _clients.size(); i++){
-        if (_clients[i]->_client_poll.fd == client->GET_Client_Fd())
+        if (_clients[i]->get_clientfd() == client->get_clientfd())
         {
             // maybe close de fd
-            close(client->GET_Client_Fd());
+            close(client->get_clientfd());
             _clients.erase(_clients.begin() + i);
             break;
         }
@@ -63,7 +63,7 @@ void Server::accept_new_connection()
 
     std::cout << "[Server] New client connected on fd " << client_fd << std::endl;
 
-    std::string msg = "Welcome. You are client " + client->GET_Username() + " " + client->GET_Nickname() + "\n";
+    std::string msg = "Welcome. You are client " + client->get_username() + " " + client->get_nick() + "\n";
     int status = send(client_fd, msg.c_str(), msg.size(), 0);
     if (status == -1)
         std::cerr << "[Server] Send error to client " << client_fd << ": " << strerror(errno) << std::endl;
@@ -74,7 +74,7 @@ void Server::read_data_from_socket(Client *client)
 {
     char buffer[1024];
     
-    int bytes_read = recv(client->GET_Client_Fd(), buffer, sizeof(buffer) - 1, 0);
+    int bytes_read = recv(client->get_clientfd(), buffer, sizeof(buffer) - 1, 0);
     if (bytes_read < 0) { // && errno != EWOULDBLOCK
         std::cerr << "[Server] Recv error: " << strerror(errno) << std::endl;
         this->disconect_client(client);
@@ -82,14 +82,14 @@ void Server::read_data_from_socket(Client *client)
     }
 
     if (bytes_read == 0){
-        std::cout << "[Server] " << client->GET_Nickname() << ", client fd " << client->GET_Client_Fd() << " disconnected" << std::endl;
+        std::cout << "[Server] " << client->get_nick() << ", client fd " << client->get_clientfd() << " disconnected" << std::endl;
         this->disconect_client(client);
         return ;
     }
     
     buffer[bytes_read] = 0;
 
-    std::string& msg = client->GET_Message();
+    std::string& msg = client->get_message();
     msg.append(buffer);
     
     while (!msg.empty()) {
@@ -102,13 +102,9 @@ void Server::read_data_from_socket(Client *client)
         std::string cmd(msg.c_str(), position);
         if (cmd[cmd.size() - 1] == '\r')
             cmd.erase(cmd.size() - 1);
-        std::cout << "size cmd : " << cmd.size() << " : " << cmd << std::endl;
-        if (cmd.compare("JOIN #test") == 0)
-        {
-            std::cout << "JOIN #test detected" << std::endl;
-        }
-        // IRC_Parser(msg, this, client);
-    
+        // std::cout << "size cmd : " << cmd.size() << " : " << cmd << std::endl;
+        
+        IRC_Parser(cmd, this, client);
         msg.erase(0, position + 1);
     }
 
@@ -143,7 +139,7 @@ Client* Server::FINDING_Client_fd(int client_fd)
 {
     for (size_t i = 0; i < _clients.size(); ++i)
     {
-        if (_clients[i]->GET_Pollfd().fd == client_fd)
+        if (_clients[i]->get_pollfd().fd == client_fd)
             return _clients[i];
     }
     return NULL;
@@ -154,7 +150,7 @@ Client* Server::FINDING_Client_str(std::string  username)
 {
     for (size_t i = 0; i < _clients.size(); ++i)
     {
-        if (_clients[i]->GET_Username() == username)
+        if (_clients[i]->get_username() == username)
             return _clients[i];
     }
     return NULL;
@@ -211,6 +207,28 @@ void	Server::start()
     COMMANDE
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
+void Server::PASS(Client *client, std::string argument)
+{
+    std::cout << "PASS DETECTED" << std::endl;
+    (void)client;
+    (void)argument;
+    // IF NB ARGUMENT != 1
+    // 461 "Not enough parameters"
+    if (client->_registred_password == 1)
+    {
+        // 462  "You may not reregister"
+        return ;
+    }
+
+    // if compare with _password good
+    //    client->_registred_password = 1;
+    // else
+    // {
+    //     // 464 "Password incorrect"
+    // }
+}
+
+
 Channel *Server::CHANNEL_Exist(std::string channel_name)
 {
     for (size_t i = 0; i < _channels.size(); ++i)
@@ -240,21 +258,21 @@ void Server::JOIN(Client *user, std::string channel_name)
         channel = new Channel(channel_name, topic);
         _channels.push_back(channel);
         msg = "You created " + channel_name + " and you are now an administrator\n";
-        status = send(user->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        status = send(user->get_clientfd(), msg.c_str(), msg.size(), 0);
         user->OPERATOR();
     }
-    if (user->GET_Channel() != channel)
+    if (user->get_channel() != channel)
     {
-        std::cout << "Channel " << channel_name << " joined by " << user->GET_Username() << std::endl;
+        std::cout << "Channel " << channel_name << " joined by " << user->get_username() << std::endl;
         channel->ADD_User(user);
         msg = "You Joined " + channel_name + "\n";
-        status = send(user->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        status = send(user->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
     else
     {
-        std::cout << user->GET_Username() << " already joined " << channel->GET_Name() << std::endl;
+        std::cout << user->get_username() << " already joined " << channel->GET_Name() << std::endl;
         msg = "You already joined " + channel_name + "\n";
-        status = send(user->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        status = send(user->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
    (void)status;
 }
@@ -264,26 +282,26 @@ void Server::KICK(Client *client, std::string argument)
     std::string msg;
     int status;
 
-    if (!client->IS_Operator())
+    if (!client->is_operator())
         return;
     Client *kicked_user = FINDING_Client_str(argument);
-    if (kicked_user && kicked_user->GET_Channel() == client->GET_Channel())
+    if (kicked_user && kicked_user->get_channel() == client->get_channel())
     {
-        kicked_user->GET_Channel()->DELETE_User(kicked_user);
-        msg = "Client " + kicked_user->GET_Username() + " has benn kicked of the " + client->GET_Channel()->GET_Name() + " channel\n";
-        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
-        msg = "You have been kickend from " + client->GET_Channel()->GET_Name() + " by " + client->GET_Username() + "\n";
-        status = send(kicked_user->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        kicked_user->get_channel()->DELETE_User(kicked_user);
+        msg = "Client " + kicked_user->get_username() + " has benn kicked of the " + client->get_channel()->GET_Name() + " channel\n";
+        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
+        msg = "You have been kickend from " + client->get_channel()->GET_Name() + " by " + client->get_username() + "\n";
+        status = send(kicked_user->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
-    else if (kicked_user && kicked_user->GET_Channel() != client->GET_Channel())
+    else if (kicked_user && kicked_user->get_channel() != client->get_channel())
     {
-        msg = "Client " + kicked_user->GET_Username() + " is not in your channel " + client->GET_Channel()->GET_Name() + "\n";
-        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        msg = "Client " + kicked_user->get_username() + " is not in your channel " + client->get_channel()->GET_Name() + "\n";
+        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
     else
     {
         msg = "No client " + argument + " found\n";
-        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
     (void)status;
     (void)kicked_user;
@@ -291,7 +309,7 @@ void Server::KICK(Client *client, std::string argument)
 void Server::INVITE(Client *client, std::string argument)
 {
     std::cout << "INVITE DETECTED ON " << argument << std::endl;
-    if (!client->IS_Operator())
+    if (!client->is_operator())
         return;
 }
 void Server::TOPIC(Client *client, std::string argument)
@@ -299,26 +317,26 @@ void Server::TOPIC(Client *client, std::string argument)
     std::cout << "TOPIC DETECTED" << std::endl;;
     std::string msg;
     int status;
-    if (client->GET_Channel() && argument.empty())
+    if (client->get_channel() && argument.empty())
     {
-        msg = client->GET_Channel()->GET_Topic();
-        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        msg = client->get_channel()->GET_Topic();
+        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
     else if (argument.empty())
     {
         msg = "No channel joined yet\n";
-        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
-    else if  (!client->IS_Operator())
+    else if  (!client->is_operator())
     {
         msg = "You are not habilited to change the topic of this channe\n";
-        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
     else
     {
-        client->GET_Channel()->SET_Topic(argument);
+        client->get_channel()->SET_Topic(argument);
         msg = "Topic successfully changed !\n";
-        status = send(client->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
     (void)status;
     (void)argument;
@@ -326,6 +344,6 @@ void Server::TOPIC(Client *client, std::string argument)
 void Server::MODE(Client *client, std::string argument)
 {
     std::cout << "MODE " << argument << " DETECTED" << std::endl;
-    if (!client->IS_Operator())
+    if (!client->is_operator())
         return;
 }

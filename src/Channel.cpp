@@ -32,12 +32,12 @@ void	Channel::DELETE_User(Client *client)
 void	Channel::SEND_Msg(std::string msg, Client *client)
 {
 	int status;
-	msg = "[" + client->GET_Username() + "]" + " : " + msg;
+	msg = "[" + client->get_username() + "]" + " : " + msg;
 
 	for (size_t	i = 0; i < _client.size(); ++i)
 	{
 		if (_client[i] != client)
-			status = send(_client[i]->GET_Client_Fd(), msg.c_str(), msg.size(), 0);
+			status = send(_client[i]->get_clientfd(), msg.c_str(), msg.size(), 0);
 	}
 	(void)status;
 }

@@ -12,8 +12,8 @@ std::string CMD_Finder(std::string msg)
 	if (pos != std::string::npos)
 	{
 		cmd = msg.substr(0, pos);
-		std::string possible_cmd[5] = {"KICK", "JOIN", "TOPIC", "INVITE", "MODE"};
-		for (size_t i = 0; i != 5; i++)
+		std::string possible_cmd[9] = {"PASS", "NICK", "USER", "QUIT", "KICK", "JOIN", "TOPIC", "INVITE", "MODE"};
+		for (size_t i = 0; i != 9; i++)
 		{
 			if (cmd == possible_cmd[i])
 				return cmd;
@@ -38,19 +38,13 @@ std::string ARG_Finder(std::string msg)
 
 void PRINT_Msg(std::string msg, Server *serv, Client *client)
 {
-	if (client->GET_Channel())
-		client->GET_Channel()->SEND_Msg(msg, client);
+	if (client->get_channel())
+		client->get_channel()->SEND_Msg(msg, client);
 	(void)serv;
 }
 
 void IRC_Parser(std::string msg, Server *serv, Client *client)
 {
-	if (client == NULL)
-	{
-		std::cout << "client non trouver" << std::endl;
-		return;
-	}
-
 	std::string cmd = CMD_Finder(msg);
 	//std::cout << "MSG : " << msg << "CMD : " << cmd << std::endl;
 	if (cmd.empty())
@@ -61,6 +55,17 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 	}
 
 	std::string	argument = ARG_Finder(msg);
+
+	if (cmd == "PASS")
+		serv->PASS(client, argument);
+	// else if (cmd == "NICK")
+	// 	serv->NICK(client, argument);
+	// else if (cmd == "USER")
+	// 	serv->USER(client, argument);
+	// else if (cmd == "QUIT")
+	// 	serv->QUIT(client, argument);
+	
+	
 	if (cmd == "JOIN")
 		serv->JOIN(client, argument);
 	else if (cmd == "KICK")
@@ -71,6 +76,4 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 		serv->TOPIC(client, argument);
 	else if (cmd == "MODE")
 		serv->MODE(client, argument);
-	else
-		std::cout << "WTFFF" << std::endl;
 }

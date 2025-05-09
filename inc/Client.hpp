@@ -25,15 +25,20 @@ class Channel;
 class Client
 {
 	private :
-		std::string	_nickname;
 		int			_operator;
-		Channel		*_channel;
 		int			_client_fd;
+
+		pollfd		_client_poll;
+		Channel		*_channel;
+
+		std::string	_nickname;
 		std::string	_msg;
+		std::string	_username;
 		
 	public :
-		pollfd		_client_poll;
-		std::string	_username;
+		int 		_registred_password;
+		int			_registred_user;
+
 		Client(pollfd client_poll, int client_fd);
 		~Client();
 
@@ -41,14 +46,15 @@ class Client
 		void	DELETE_Channel(){_channel = NULL;}
 		void	OPERATOR(){_operator = 1;}
 
+		void	Send_message(std::string msg);
 		//GETTER
-		pollfd			GET_Pollfd(){return _client_poll;}
-		std::string		GET_Nickname(){return _nickname;}
-		std::string		GET_Username(){return _username;}
-		std::string&	GET_Message(){return _msg;}
-		Channel			*GET_Channel(){return _channel;}
-		int				GET_Client_Fd(){return _client_fd;}
-		int				IS_Operator(){return _operator;}
+		std::string		get_nick(){return _nickname;}
+		std::string		get_username(){return _username;}
+		std::string&	get_message(){return _msg;}
+		pollfd			get_pollfd(){return _client_poll;}
+		Channel			*get_channel(){return _channel;}
+		int				get_clientfd(){return _client_fd;}
+		int				is_operator(){return _operator;}
 
 };
 

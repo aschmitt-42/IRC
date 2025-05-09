@@ -1,41 +1,33 @@
 #include "Client.hpp"
 
 
-Client::Client(pollfd client_poll, int client_fd) : _operator(0),_client_poll(client_poll)
+Client::Client(pollfd client_poll, int client_fd)
 {
-	// (void)_operator;
-	// char buffer[1024] = {0};
-	// int status;
-	// std::string msg;
-	// (void)status;
-
+	_operator = 0;
 	_client_fd = client_fd;
-	// msg = "USERNAME : ";
-	// status = send(client_fd, msg.c_str(), msg.size(), 0);
-    // ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-    // if (bytes_read > 0) 
-	// {
-    //     buffer[bytes_read -1] = '\0';  // null-terminate
-    //     _username = buffer;
-    //     //std::cout << "Utilisateur connecté : " << username << std::endl;
-	// }   
-	// else
-    //     std::cerr << "Erreur ou client déconnecté." << std::endl;
+	
+	_client_poll = client_poll;
+	_channel = NULL;
 
-	// msg = "NICKNAME : ";
-	// status = send(client_fd, msg.c_str(), msg.size(), 0);
-    // bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-    // if (bytes_read > 0) 
-	// {
-    //     buffer[bytes_read - 1] = '\0';  // null-terminate
-    //     _nickname = buffer;
-    // } 
-	// else 
-    //     std::cerr << "Erreur ou client déconnecté." << std::endl;
+	_nickname = "";
+	_msg = "";
+	_username = "";
+	
+	_registred_password = 0;
+	_registred_user = 0;
 }
 
 Client::~Client()
 {
 	// std::cout << "Destructor called" << std::endl;
+}
+
+void Client::Send_message(std::string msg)
+{
+	msg += "\r\n";
+	if (send(_client_fd, msg.c_str(), msg.size(), 0) == -1)
+	{
+		std::cerr << "Error sending message to client" << std::endl;
+	}
 }
 
