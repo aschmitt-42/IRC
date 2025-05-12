@@ -8,7 +8,7 @@ OBJDIR		= .objFiles
 SRCDIR		= src
 INCDIR		= inc
 
-FILES		= main Server Utils Client Parser Channel
+FILES		= main Server Utils Client Parser Channel Command
 INCFILE		= Server Client Channel
 
 SRC			= $(addprefix $(SRCDIR)/, $(FILES:=.cpp))
