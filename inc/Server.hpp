@@ -54,12 +54,17 @@ class Server
 		std::vector<pollfd>		get_pollfd(){return _poll_fds;}
 
 		//command
-		void PASS(Client *client, std::string argument);
-		void JOIN(Client *user, std::string channel_name);
-		void KICK(Client *client, std::string argument);
-		void INVITE(Client *client, std::string argument);
-		void TOPIC(Client *client, std::string argument);
-		void MODE(Client *client, std::string argument);
+		
+		void PASS(Client *client, std::vector<std::string> argument);
+		void NICK(Client *client, std::vector<std::string>argument);
+		void USER(Client *client, std::vector<std::string>argument);
+
+		void QUIT(Client *client, std::vector<std::string>argument);
+		void JOIN(Client *user, std::vector<std::string> argument);
+		void KICK(Client *client, std::vector<std::string> argument);
+		void INVITE(Client *client, std::vector<std::string> argument);
+		void TOPIC(Client *client, std::vector<std::string> argument);
+		void MODE(Client *client, std::vector<std::string> argument);
 		Channel	*CHANNEL_Exist(std::string channel_name);
 };
 
@@ -67,5 +72,22 @@ class Server
 int create_server_socket(int port);
 void add_to_poll_fds(struct pollfd *poll_fds[], int new_fd, int *poll_count, int *poll_size);
 void IRC_Parser(std::string msg, Server *serv, Client *client);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//FONCTION DERREUR
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void	err_461(std::string cmd, Client *client){ client->Send_message(cmd + " :Not enough parameters");}
+void	err_462(Client *client){ client->Send_message(":Unauthorized command (already registered)");}
+void	err_464(Client *client){ client->Send_message(":Password incorrect");}
+// void	err_461(Client *client){ client->Send_message("");}
+// void	err_461(Client *client){ client->Send_message("");}
+// void	err_461(Client *client){ client->Send_message("");}
+// void	err_461(Client *client){ client->Send_message("");}
+// void	err_461(Client *client){ client->Send_message("");}
+// void	err_461(Client *client){ client->Send_message("");}
+// void	err_461(Client *client){ client->Send_message("");}
+// void	err_461(Client *client){ client->Send_message("");}
+// void	err_461(Client *client){ client->Send_message("");}
 
 #endif

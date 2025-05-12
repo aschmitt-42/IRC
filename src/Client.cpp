@@ -31,3 +31,10 @@ void Client::Send_message(std::string msg)
 	}
 }
 
+int	Client::REGISTRED()
+{
+	if (!_nickname.empty() && !_username.empty())
+		return 1;
+	return 0;
+}
+

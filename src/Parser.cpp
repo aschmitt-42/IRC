@@ -23,17 +23,19 @@ std::string CMD_Finder(std::string msg)
 	return cmd;
 }
 
-std::string ARG_Finder(std::string msg)
+std::vector<std::string> ARG_Finder(std::string msg)
 {
-    std::istringstream stream(msg);
+    std::vector<std::string> words;
     std::string word;
 
-    stream >> word;
-
-    if (stream >> word)
-        return word;
-	else 
-        return "";
+    std::stringstream ss(msg);
+    ss >> word;
+	while (ss >> word) 
+	{
+        words.push_back(word);
+		std::cout << word << std::endl;
+    }
+	return words;
 }
 
 void PRINT_Msg(std::string msg, Server *serv, Client *client)
@@ -46,26 +48,32 @@ void PRINT_Msg(std::string msg, Server *serv, Client *client)
 void IRC_Parser(std::string msg, Server *serv, Client *client)
 {
 	std::string cmd = CMD_Finder(msg);
-	//std::cout << "MSG : " << msg << "CMD : " << cmd << std::endl;
-	if (cmd.empty())
+	if (cmd.empty() && client->_registred_user)
 	{
 		std::cout << "cmd empty\n" <<std::endl;
 		PRINT_Msg(msg, serv, client);
 		return;
 	}
-
-	std::string	argument = ARG_Finder(msg);
-
+	std::vector<std::string>	argument = ARG_Finder(msg);
 	if (cmd == "PASS")
 		serv->PASS(client, argument);
-	// else if (cmd == "NICK")
-	// 	serv->NICK(client, argument);
-	// else if (cmd == "USER")
-	// 	serv->USER(client, argument);
-	// else if (cmd == "QUIT")
-	// 	serv->QUIT(client, argument);
+	else if (!client->_registred_password)
+	{
+		//err, demander de donner le password
+		return;
+	}
+	else if (cmd == "NICK")
+		serv->NICK(client, argument);
+	else if (cmd == "USER")
+		serv->USER(client, argument);
+	else if (cmd == "QUIT")
+		serv->QUIT(client, argument);
 	
-	
+	if (!client->_registred_user)
+	{
+		//err de register
+		return;
+	}
 	if (cmd == "JOIN")
 		serv->JOIN(client, argument);
 	else if (cmd == "KICK")

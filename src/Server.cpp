@@ -207,25 +207,63 @@ void	Server::start()
     COMMANDE
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
-void Server::PASS(Client *client, std::string argument)
+//REGISTER
+void Server::PASS(Client *client, std::vector<std::string> argument)
 {
     std::cout << "PASS DETECTED" << std::endl;
     (void)client;
     (void)argument;
-    // IF NB ARGUMENT != 1
-    // 461 "Not enough parameters"
+    if (argument.size() != 1)
+        err_461("PASS", client);
     if (client->_registred_password == 1)
     {
-        // 462  "You may not reregister"
+        err_462(client);
         return ;
     }
 
-    // if compare with _password good
-    //    client->_registred_password = 1;
-    // else
-    // {
-    //     // 464 "Password incorrect"
-    // }
+    if (argument[0] == _password)
+        client->_registred_password = 1;
+    else
+        err_464(client);
+}
+
+void Server::NICK(Client *client, std::vector<std::string>argument)
+{
+    std::cout << "NICK DETECTED" << std::endl;
+
+    //if (argument[0].empty)
+        //ERR_NONICKNAMEGIVEN
+    //if (ncik already exist)
+        //
+    //if (too long)
+        //
+    //if (too much arg)
+        //
+    client->SET_Nick(argument[0]);
+    if (client->REGISTRED())
+        client->_registred_user = 1;
+}
+void Server::USER(Client *client, std::vector<std::string>argument)
+{
+    std::cout << "NICK DETECTED" << std::endl;
+
+    //if (argument[0].empty)
+        //ERR_NONICKNAMEGIVEN
+    //if (ncik already exist)
+        //
+    //if (too long)
+        //
+    //if (too much arg)
+        //
+    client->SET_Nick(argument[0]);
+    if (client->REGISTRED())
+        client->_registred_user = 1;
+}
+void Server::QUIT(Client *client, std::vector<std::string>argument)
+{
+    std::cout << "QUIT DETECTED" << std::endl;
+
+
 }
 
 
@@ -239,10 +277,11 @@ Channel *Server::CHANNEL_Exist(std::string channel_name)
     return NULL;
 }
 
-void Server::JOIN(Client *user, std::string channel_name)
+void Server::JOIN(Client *user, std::vector<std::string> argument)
 {
     std::cout << "JOIN DETECTED" << std::endl;
     std::string msg;
+    std::string channel_name = argument[0];
     int status;
 
     if (channel_name.empty())
@@ -276,15 +315,15 @@ void Server::JOIN(Client *user, std::string channel_name)
     }
    (void)status;
 }
-void Server::KICK(Client *client, std::string argument)
+void Server::KICK(Client *client, std::vector<std::string> argument)
 {
-    std::cout << "KICK DETECTED ON " << argument << std::endl;
+    std::cout << "KICK DETECTED ON " << argument[0] << std::endl;
     std::string msg;
     int status;
 
     if (!client->is_operator())
         return;
-    Client *kicked_user = FINDING_Client_str(argument);
+    Client *kicked_user = FINDING_Client_str(argument[0]);
     if (kicked_user && kicked_user->get_channel() == client->get_channel())
     {
         kicked_user->get_channel()->DELETE_User(kicked_user);
@@ -300,19 +339,19 @@ void Server::KICK(Client *client, std::string argument)
     }
     else
     {
-        msg = "No client " + argument + " found\n";
+        msg = "No client " + argument[0] + " found\n";
         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
     (void)status;
     (void)kicked_user;
 }
-void Server::INVITE(Client *client, std::string argument)
+void Server::INVITE(Client *client, std::vector<std::string> argument)
 {
-    std::cout << "INVITE DETECTED ON " << argument << std::endl;
+    std::cout << "INVITE DETECTED ON " << argument[0] << std::endl;
     if (!client->is_operator())
         return;
 }
-void Server::TOPIC(Client *client, std::string argument)
+void Server::TOPIC(Client *client, std::vector<std::string> argument)
 {
     std::cout << "TOPIC DETECTED" << std::endl;;
     std::string msg;
@@ -334,16 +373,16 @@ void Server::TOPIC(Client *client, std::string argument)
     }
     else
     {
-        client->get_channel()->SET_Topic(argument);
+        client->get_channel()->SET_Topic(argument[0]);
         msg = "Topic successfully changed !\n";
         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
     (void)status;
     (void)argument;
 }
-void Server::MODE(Client *client, std::string argument)
+void Server::MODE(Client *client, std::vector<std::string> argument)
 {
-    std::cout << "MODE " << argument << " DETECTED" << std::endl;
+    std::cout << "MODE " << argument[0] << " DETECTED" << std::endl;
     if (!client->is_operator())
         return;
 }

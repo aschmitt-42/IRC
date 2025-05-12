@@ -47,6 +47,8 @@ class Client
 		void	OPERATOR(){_operator = 1;}
 
 		void	Send_message(std::string msg);
+		int		REGISTRED();
+	
 		//GETTER
 		std::string		get_nick(){return _nickname;}
 		std::string		get_username(){return _username;}
@@ -55,6 +57,9 @@ class Client
 		Channel			*get_channel(){return _channel;}
 		int				get_clientfd(){return _client_fd;}
 		int				is_operator(){return _operator;}
+
+		//SETTER
+		void			SET_Nick(std::string nick){_nickname = nick;}
 
 };
 
