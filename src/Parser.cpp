@@ -38,19 +38,19 @@ std::vector<std::string> ARG_Finder(std::string msg)
 	return words;
 }
 
-void PRINT_Msg(std::string msg, Server *serv, Client *client)
-{
-	if (client->get_channel())
-		client->get_channel()->SEND_Msg(msg, client);
-	(void)serv;
-}
+// void PRINT_Msg(std::string msg, Server *serv, Client *client)
+// {
+// 	if (client->get_channel())
+// 		client->get_channel()->SEND_Msg(msg, client);
+// 	(void)serv;
+// }
 
 void IRC_Parser(std::string msg, Server *serv, Client *client)
 {
 	std::string cmd = CMD_Finder(msg);
 	if (cmd.empty() && client->_registred_user)
 	{
-		PRINT_Msg(msg, serv, client);
+		// PRINT_Msg(msg, serv, client);
 		return;
 	}
 	std::vector<std::string>	argument = ARG_Finder(msg);
@@ -72,12 +72,12 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 	}
 	if (cmd == "JOIN")
 		serv->JOIN(client, argument);
-	else if (cmd == "KICK")
-		serv->KICK(client, argument);
-	else if (cmd == "INVITE")
-		serv->INVITE(client, argument);
-	else if (cmd == "TOPIC")
-		serv->TOPIC(client, argument);
-	else if (cmd == "MODE")
-		serv->MODE(client, argument);
+	// else if (cmd == "KICK")
+	// 	serv->KICK(client, argument);
+	// else if (cmd == "INVITE")
+	// 	serv->INVITE(client, argument);
+	// else if (cmd == "TOPIC")
+	// 	serv->TOPIC(client, argument);
+	// else if (cmd == "MODE")
+	// 	serv->MODE(client, argument);
 }
