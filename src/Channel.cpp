@@ -11,10 +11,28 @@ Channel::Channel(std::string channel_name, std::string topic_name)
 Channel::~Channel(){}
 
 
-void	Channel::ADD_User(Client *client)
+int	Channel::Add_User(Client *client)
 {
+	for (size_t i = 0; i < _client.size(); i++)
+	{
+		if (_client[i]->get_nick().compare(client->get_nick()) == 0)
+		{
+			// err client already in the channel
+			return 1;
+		}
+	}
+	
 	_client.push_back(client);
-	client->JOIN_Channel(this);
+	return 0;
+}
+
+void	Channel::New_User_msg(std::string msg)
+{
+	for (size_t i = 0; i < _client.size(); i++)
+	{
+		_client[i]->Send_message(msg);
+	}
+	
 }
 
 void	Channel::DELETE_User(Client *client)
@@ -24,7 +42,7 @@ void	Channel::DELETE_User(Client *client)
 		if (_client[i] == client)
 		{
 			_client.erase(_client.begin() + i);
-			client->DELETE_Channel();
+			// client->DELETE_Channel();
 		}
 	}
 }
