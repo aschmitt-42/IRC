@@ -45,3 +45,12 @@ std::string intToString(int number)
     return oss.str();
 }
 
+void	ERR(Client *client, int err_id, std::string command, std::string msg)
+{
+	if (!client)
+		return;
+	if (command.empty())
+		client->Send_message(intToString(err_id) + " :" + msg);
+	else
+		client->Send_message(intToString(err_id) + " " + command + " :" + msg);
+}

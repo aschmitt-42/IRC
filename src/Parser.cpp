@@ -50,28 +50,24 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 	std::string cmd = CMD_Finder(msg);
 	if (cmd.empty() && client->_registred_user)
 	{
-		std::cout << "cmd empty\n" <<std::endl;
 		PRINT_Msg(msg, serv, client);
 		return;
 	}
 	std::vector<std::string>	argument = ARG_Finder(msg);
 	if (cmd == "PASS")
-		serv->PASS(client, argument);
+		return serv->PASS(client, argument);
 	else if (!client->_registred_password)
-	{
-		//err, demander de donner le password
-		return;
-	}
+		return ERR(client, 1, "", "You Need to enter the password first");
 	else if (cmd == "NICK")
-		serv->NICK(client, argument);
+		return serv->NICK(client, argument);
 	else if (cmd == "USER")
-		serv->USER(client, argument);
+		return serv->USER(client, argument);
 	else if (cmd == "QUIT")
-		serv->QUIT(client, argument);
+		return serv->QUIT(client, argument);
 	
 	if (!client->_registred_user)
 	{
-		//err de register
+		ERR(client, 1, "", "You need to register with USER and NICK command");
 		return;
 	}
 	if (cmd == "JOIN")

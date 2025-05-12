@@ -32,8 +32,10 @@ class Client
 		Channel		*_channel;
 
 		std::string	_nickname;
-		std::string	_msg;
 		std::string	_username;
+		std::string	_realname;
+		std::string	_msg;
+		int			_mode;
 		
 	public :
 		int 		_registred_password;
@@ -60,6 +62,7 @@ class Client
 
 		//SETTER
 		void			SET_Nick(std::string nick){_nickname = nick;}
+		void			SET_Username(std::vector<std::string> argument);
 
 };
 

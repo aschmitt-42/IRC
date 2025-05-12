@@ -38,3 +38,10 @@ int	Client::REGISTRED()
 	return 0;
 }
 
+void	Client::SET_Username(std::vector<std::string> argument)
+{
+	_username = argument[0];
+	_mode = std::atoi(argument[1].c_str());
+	_realname = argument[3];
+}
+

@@ -65,6 +65,8 @@ class Server
 		void INVITE(Client *client, std::vector<std::string> argument);
 		void TOPIC(Client *client, std::vector<std::string> argument);
 		void MODE(Client *client, std::vector<std::string> argument);
+
+		int 	NICK_Already_Exist(std::string nickname);
 		Channel	*CHANNEL_Exist(std::string channel_name);
 };
 
@@ -72,22 +74,13 @@ class Server
 int create_server_socket(int port);
 void add_to_poll_fds(struct pollfd *poll_fds[], int new_fd, int *poll_count, int *poll_size);
 void IRC_Parser(std::string msg, Server *serv, Client *client);
-
+std::string intToString(int number);
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //FONCTION DERREUR
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void	err_461(std::string cmd, Client *client){ client->Send_message(cmd + " :Not enough parameters");}
-void	err_462(Client *client){ client->Send_message(":Unauthorized command (already registered)");}
-void	err_464(Client *client){ client->Send_message(":Password incorrect");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
+
+void	ERR(Client *client, int err_id, std::string command, std::string msg);
+//ERR(client, 1, "", "");
 
 #endif

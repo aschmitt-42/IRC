@@ -208,35 +208,45 @@ void	Server::start()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 //REGISTER
+
+int Server::NICK_Already_Exist(std::string nickname)
+{
+    for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it) 
+    {
+        if ((*it)->get_nick() == nickname)
+            return 1;
+    }
+    return 0;
+}
+
 void Server::PASS(Client *client, std::vector<std::string> argument)
 {
     std::cout << "PASS DETECTED" << std::endl;
     (void)client;
     (void)argument;
     if (argument.size() != 1)
-        err_461("PASS", client);
+        return ERR(client, 461, "PASS", "Not enough parameters");
     if (client->_registred_password == 1)
     {
-        err_462(client);
+        return ERR(client, 461, "", ":Unauthorized command (already registered)");
         return ;
     }
 
     if (argument[0] == _password)
         client->_registred_password = 1;
     else
-        err_464(client);
+        return ERR(client, 461, "","Password incorrect");
 }
 
 void Server::NICK(Client *client, std::vector<std::string>argument)
 {
     std::cout << "NICK DETECTED" << std::endl;
 
-    //if (argument[0].empty)
-        //ERR_NONICKNAMEGIVEN
-    //if (ncik already exist)
-        //
-    //if (too long)
-        //
+    if (argument[0].empty())
+        return ERR(client, 1, "", "nickname empty");
+    if (NICK_Already_Exist(argument[0]))
+        return ERR(client, 460, "NICK", "Nick already exist");
+
     //if (too much arg)
         //
     client->SET_Nick(argument[0]);
@@ -245,17 +255,19 @@ void Server::NICK(Client *client, std::vector<std::string>argument)
 }
 void Server::USER(Client *client, std::vector<std::string>argument)
 {
-    std::cout << "NICK DETECTED" << std::endl;
+    std::cout << "USER DETECTED" << std::endl;
 
-    //if (argument[0].empty)
-        //ERR_NONICKNAMEGIVEN
-    //if (ncik already exist)
-        //
-    //if (too long)
-        //
-    //if (too much arg)
-        //
-    client->SET_Nick(argument[0]);
+    if (argument.size() != 4)
+        return ERR(client, 1, "", "arg nb wrong");
+    if (argument[0].empty())
+        return ERR(client, 1, "", "username empty");
+    if (argument[1].size() != 1 || !std::isdigit(argument[1][0]))
+        return ERR(client, 1, "", "mode isnt numeric or too long [0 - 9]");
+    if (argument[0].size() > 9)
+        return ERR(client, 1, "", "username too long");
+    //if (username already exist)
+
+    client->SET_Username(argument);
     if (client->REGISTRED())
         client->_registred_user = 1;
 }
@@ -263,7 +275,8 @@ void Server::QUIT(Client *client, std::vector<std::string>argument)
 {
     std::cout << "QUIT DETECTED" << std::endl;
 
-
+    (void)client;
+    (void)argument;
 }
 
 
