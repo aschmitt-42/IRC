@@ -53,7 +53,9 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 		// PRINT_Msg(msg, serv, client);
 		return;
 	}
+
 	std::vector<std::string>	argument = ARG_Finder(msg);
+	
 	if (cmd == "PASS")
 		return serv->PASS(client, argument);
 	else if (!client->_registred_password)

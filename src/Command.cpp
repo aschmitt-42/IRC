@@ -94,109 +94,106 @@ Channel *Server::CHANNEL_Exist(std::string channel_name)
     return NULL;
 }
 
-void Server::JOIN(Client *user, std::vector<std::string> argument)
+void Server::JOIN(Client *client, std::vector<std::string> argument)
 {
     std::cout << "JOIN DETECTED" << std::endl;
     std::string msg;
     std::string channel_name = argument[0];
-    int status;
 
     if (channel_name.empty())
     {
-        std::cerr << "No channel specified" << std::endl;
+        // sendError(client, 461, "JOIN", "Not enough parameters");
         return;
     }
 
     Channel *channel = CHANNEL_Exist(channel_name);
+
     if (!channel)
     {
         std::string topic = "No topic\n";
+
         channel = new Channel(channel_name, topic);
         _channels.push_back(channel);
-        msg = "You created " + channel_name + " and you are now an administrator\n";
-        status = send(user->get_clientfd(), msg.c_str(), msg.size(), 0);
-        user->OPERATOR();
     }
-    if (user->get_channel() != channel)
+    
+    
+    if (channel->Add_User(client))
     {
-        std::cout << "Channel " << channel_name << " joined by " << user->get_username() << std::endl;
-        channel->ADD_User(user);
-        msg = "You Joined " + channel_name + "\n";
-        status = send(user->get_clientfd(), msg.c_str(), msg.size(), 0);
-    }
-    else
-    {
-        std::cout << user->get_username() << " already joined " << channel->GET_Name() << std::endl;
-        msg = "You already joined " + channel_name + "\n";
-        status = send(user->get_clientfd(), msg.c_str(), msg.size(), 0);
-    }
-   (void)status;
-}
-void Server::KICK(Client *client, std::vector<std::string> argument)
-{
-    std::cout << "KICK DETECTED ON " << argument[0] << std::endl;
-    std::string msg;
-    int status;
-
-    if (!client->is_operator())
+        // already in the channel
         return;
-    Client *kicked_user = FINDING_Client_str(argument[0]);
-    if (kicked_user && kicked_user->get_channel() == client->get_channel())
-    {
-        kicked_user->get_channel()->DELETE_User(kicked_user);
-        msg = "Client " + kicked_user->get_username() + " has benn kicked of the " + client->get_channel()->GET_Name() + " channel\n";
-        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-        msg = "You have been kickend from " + client->get_channel()->GET_Name() + " by " + client->get_username() + "\n";
-        status = send(kicked_user->get_clientfd(), msg.c_str(), msg.size(), 0);
     }
-    else if (kicked_user && kicked_user->get_channel() != client->get_channel())
-    {
-        msg = "Client " + kicked_user->get_username() + " is not in your channel " + client->get_channel()->GET_Name() + "\n";
-        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-    }
-    else
-    {
-        msg = "No client " + argument[0] + " found\n";
-        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-    }
-    (void)status;
-    (void)kicked_user;
+
+    client->Join_Channel(channel);
+    std::string joinMsg = ":" + client->get_Prefix() + " JOIN :" + channel_name;
+    channel->New_User_msg(msg);
+
+    //reponse au client avec list des membre du channel
 }
+// void Server::KICK(Client *client, std::vector<std::string> argument)
+// {
+//     std::cout << "KICK DETECTED ON " << argument[0] << std::endl;
+//     std::string msg;
+//     int status;
+
+//     if (!client->is_operator())
+//         return;
+//     Client *kicked_user = FINDING_Client_str(argument[0]);
+//     if (kicked_user && kicked_user->get_channel() == client->get_channel())
+//     {
+//         kicked_user->get_channel()->DELETE_User(kicked_user);
+//         msg = "Client " + kicked_user->get_username() + " has benn kicked of the " + client->get_channel()->GET_Name() + " channel\n";
+//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
+//         msg = "You have been kickend from " + client->get_channel()->GET_Name() + " by " + client->get_username() + "\n";
+//         status = send(kicked_user->get_clientfd(), msg.c_str(), msg.size(), 0);
+//     }
+//     else if (kicked_user && kicked_user->get_channel() != client->get_channel())
+//     {
+//         msg = "Client " + kicked_user->get_username() + " is not in your channel " + client->get_channel()->GET_Name() + "\n";
+//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
+//     }
+//     else
+//     {
+//         msg = "No client " + argument[0] + " found\n";
+//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
+//     }
+//     (void)status;
+//     (void)kicked_user;
+// }
 void Server::INVITE(Client *client, std::vector<std::string> argument)
 {
     std::cout << "INVITE DETECTED ON " << argument[0] << std::endl;
     if (!client->is_operator())
         return;
 }
-void Server::TOPIC(Client *client, std::vector<std::string> argument)
-{
-    std::cout << "TOPIC DETECTED" << std::endl;;
-    std::string msg;
-    int status;
-    if (client->get_channel() && argument.empty())
-    {
-        msg = client->get_channel()->GET_Topic();
-        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-    }
-    else if (argument.empty())
-    {
-        msg = "No channel joined yet\n";
-        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-    }
-    else if  (!client->is_operator())
-    {
-        msg = "You are not habilited to change the topic of this channe\n";
-        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-    }
-    else
-    {
-        client->get_channel()->SET_Topic(argument[0]);
-        msg = "Topic successfully changed !\n";
-        status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-    }
-    (void)status;
-    (void)argument;
-}
+// void Server::TOPIC(Client *client, std::vector<std::string> argument)
+// {
+//     std::cout << "TOPIC DETECTED" << std::endl;;
+//     std::string msg;
+//     int status;
+//     if (client->get_channel() && argument.empty())
+//     {
+//         msg = client->get_channel()->GET_Topic();
+//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
+//     }
+//     else if (argument.empty())
+//     {
+//         msg = "No channel joined yet\n";
+//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
+//     }
+//     else if  (!client->is_operator())
+//     {
+//         msg = "You are not habilited to change the topic of this channe\n";
+//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
+//     }
+//     else
+//     {
+//         client->get_channel()->SET_Topic(argument[0]);
+//         msg = "Topic successfully changed !\n";
+//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
+//     }
+//     (void)status;
+//     (void)argument;
+// }
 
 void Server::MODE(Client *client, std::vector<std::string> argument)
 {
