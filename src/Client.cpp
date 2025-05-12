@@ -7,11 +7,11 @@ Client::Client(pollfd client_poll, int client_fd)
 	_client_fd = client_fd;
 	
 	_client_poll = client_poll;
-	_channel = NULL;
 
 	_nickname = "";
 	_msg = "";
 	_username = "";
+	_hostname = "";
 	
 	_registred_password = 0;
 	_registred_user = 0;
@@ -36,5 +36,16 @@ int	Client::REGISTRED()
 	if (!_nickname.empty() && !_username.empty())
 		return 1;
 	return 0;
+}
+
+void	Client::Join_Channel(Channel *channel)
+{
+	_channels.push_back(channel);
+}
+
+std::string	Client::get_Prefix() const
+{
+	std::string s = _nickname + "!" + _username + "@" + _hostname;
+	return s;
 }
 

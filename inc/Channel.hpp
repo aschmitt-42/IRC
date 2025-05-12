@@ -32,9 +32,10 @@ class Channel
 		Channel(std::string channel_name, std::string topic);
 		~Channel();
 
-		void	ADD_User(Client *client);
+		int	Add_User(Client *client);
 		void	SEND_Msg(std::string msg, Client *client);
 		void	DELETE_User(Client *client);
+		void	New_User_msg(std::string msg);
 
 		//GETTER
 		std::string	GET_Topic(){return _topic;}

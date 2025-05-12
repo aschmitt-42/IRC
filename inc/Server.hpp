@@ -77,17 +77,6 @@ void IRC_Parser(std::string msg, Server *serv, Client *client);
 //FONCTION DERREUR
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void	err_461(std::string cmd, Client *client){ client->Send_message(cmd + " :Not enough parameters");}
-void	err_462(Client *client){ client->Send_message(":Unauthorized command (already registered)");}
-void	err_464(Client *client){ client->Send_message(":Password incorrect");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
-// void	err_461(Client *client){ client->Send_message("");}
+
 
 #endif
