@@ -58,13 +58,17 @@ class Server
 		void PASS(Client *client, std::vector<std::string> argument);
 		void NICK(Client *client, std::vector<std::string>argument);
 		void USER(Client *client, std::vector<std::string>argument);
-
+		void PING(Client *client, std::vector<std::string>argument);
+		void PONG(Client *client, std::vector<std::string>argument);
 		void QUIT(Client *client, std::vector<std::string>argument);
 		void JOIN(Client *user, std::vector<std::string> argument);
 		void KICK(Client *client, std::vector<std::string> argument);
 		void INVITE(Client *client, std::vector<std::string> argument);
 		void TOPIC(Client *client, std::vector<std::string> argument);
 		void MODE(Client *client, std::vector<std::string> argument);
+		void PRIVMSG(Client *client, std::vector<std::string> argument);
+
+		void MessageRegister(Client *client);
 
 		int 	NICK_Already_Exist(std::string nickname);
 		Channel	*CHANNEL_Exist(std::string channel_name);

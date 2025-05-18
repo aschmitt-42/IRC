@@ -63,7 +63,7 @@ void Server::accept_new_connection()
 
     std::cout << "[Server] New client connected on fd " << client_fd << std::endl;
 
-    std::string msg = "Welcome. You are client " + client->get_username() + " " + client->get_nick() + "\n";
+    std::string msg = "new connection\r\n";
     int status = send(client_fd, msg.c_str(), msg.size(), 0);
     if (status == -1)
         std::cerr << "[Server] Send error to client " << client_fd << ": " << strerror(errno) << std::endl;
@@ -102,37 +102,11 @@ void Server::read_data_from_socket(Client *client)
         std::string cmd(msg.c_str(), position);
         if (cmd[cmd.size() - 1] == '\r')
             cmd.erase(cmd.size() - 1);
-        // std::cout << "size cmd : " << cmd.size() << " : " << cmd << std::endl;
+        // std::cout << "MESSAGE :" << cmd << std::endl;
         
         IRC_Parser(cmd, this, client);
         msg.erase(0, position + 1);
     }
-
-    // int continu = 0;
-    // do {
-    //     size_t position = msg.find('\n');
-
-    //     if (position == std::string::npos){
-    //         return;
-    //     }
-    //     std::string cmd(msg.c_str(), position);
-    //     std::cout << cmd << std::endl;
-    //     // IRC_Parser(msg, this, client);
-
-    //     ++position;
-
-    //     if (position < msg.length()){
-    //         continu = 1;
-    //         msg = msg.erase(0, position);
-    //     }
-    //     else
-    //         continu = 0;
-
-    // } while (continu);
-    // msg.clear();
-
-    
-
 }
 
 Client* Server::FINDING_Client_fd(int client_fd)

@@ -1,19 +1,14 @@
 #To Do List
 
-[X] recuperer argument : le port, password
-[X] creer class server:
-    - [ ] tableau de fd descriptor
-    - [ ] ....
+[ ] Finir commande JOIN
+    - [ ] verifier si le client est deja dans le channel
+    - [ ] plusieur channel
+    - [ ] verifier 1er caractere
 
-[X] creer class client:
+[ ] Finir PRIVMSG
+    - [ ] test pour envoie a un client seul
+    - [ ] les arguments qui du coup enleve les espaces
     - [ ] 
-
-[ ] creer class chanells:
-    - [ ] 
-
-[X] message plus long que buffer size caractere non imprimable:
-
-[X] gerer les deconnexion
 
 [ ] voir les differents REVENTS :
     - [ ] POLLHERR
@@ -21,27 +16,26 @@
     - [ ] POLLIN
     - [ ] ...
 
-[ ] CTRL+D avec plusieur client en meme temp
 
 
-
-CONTINU E
-
-
+CONTINUE
 
 
 
 
 
-
-
-
-
-
-
-
-
-
+JOIN COMMMANDE :
+    - verifier si au moins 1 arg pour le nom de channel
+    - arg[1] = channel name "#test,#test2" --- split ','
+    - arg[2] = key "jean,jean" --- split ',' (pas forcement de key)
+    - parcour le tableau de channelnames
+        - recuperer key si il y en a une
+        - verifie si channelname == vide // si il commance par bon caractere
+        - trouver ou creer le channel
+        - ajouter client et channel
+        - Notifier les autres clients dans le canal
+        - Envoyer le sujet du canal (RPL_TOPIC ou RPL_NOTOPIC) au client 
+        - Envoyer la liste des membres du canal (commande NAMES)
 
 
 #ifndef IRC_RESPONSE_HPP
