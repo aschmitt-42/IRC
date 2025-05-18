@@ -6,7 +6,6 @@ Channel::Channel(std::string channel_name, std::string topic_name)
 {
 	_name = channel_name;
 	_topic = topic_name;
-	std::cout << "Channel " << _name << " successfully created !" << std::endl;
 }
 Channel::~Channel(){}
 
@@ -49,14 +48,12 @@ void	Channel::DELETE_User(Client *client)
 
 void	Channel::SEND_Msg(std::string msg, Client *client)
 {
-	int status;
-	msg = "[" + client->get_username() + "]" + " : " + msg;
+	// msg = "[" + client->get_username() + "]" + " : " + msg;
 
 	for (size_t	i = 0; i < _client.size(); ++i)
 	{
-		if (_client[i] != client)
-			status = send(_client[i]->get_clientfd(), msg.c_str(), msg.size(), 0);
+		if (_client[i]->get_nick() != client->get_nick())
+			_client[i]->Send_message(msg);
 	}
-	(void)status;
 }
 

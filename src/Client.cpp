@@ -25,6 +25,10 @@ Client::~Client()
 void Client::Send_message(std::string msg)
 {
 	msg += "\r\n";
+	// std::cout << "--------SEND_MSG--------" << std::endl;
+	// std::cout <<  msg << std::endl;
+	// std::cout << "------------------------" << std::endl;
+
 	if (send(_client_fd, msg.c_str(), msg.size(), 0) == -1)
 	{
 		std::cerr << "Error sending message to client" << std::endl;
@@ -33,7 +37,7 @@ void Client::Send_message(std::string msg)
 
 int	Client::REGISTRED()
 {
-	if (!_nickname.empty() && !_username.empty())
+	if (!_nickname.empty() && _registred_user == 1 && _registred_password == 1)
 		return 1;
 	return 0;
 }

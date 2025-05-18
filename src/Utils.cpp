@@ -24,7 +24,7 @@ int create_server_socket(int port) {
 
     sockaddr.sin_family = AF_INET; // IPv4
     sockaddr.sin_addr.s_addr = INADDR_ANY; // ou pour accessible que localement htonl(INADDR_LOOPBACK); // 127.0.0.1, localhost
-    sockaddr.sin_port = htons(port); // actuellement 4242 mais a changer avec le 1er paramettre
+    sockaddr.sin_port = htons(port); 
     
     if (bind(socket_fd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) != 0) {
         std::cerr << "[Server] Bind error: " << strerror(errno) << std::endl;
@@ -49,8 +49,11 @@ void	ERR(Client *client, int err_id, std::string command, std::string msg)
 {
 	if (!client)
 		return;
+    std::string err_msg;
 	if (command.empty())
-		client->Send_message(intToString(err_id) + " :" + msg);
+        err_msg = ":localhost " + intToString(err_id) + " :" + msg;
 	else
-		client->Send_message(intToString(err_id) + " " + command + " :" + msg);
+        err_msg = ":localhost " + intToString(err_id) + " " + command + " :" + msg;
+	client->Send_message(err_msg);
+
 }
