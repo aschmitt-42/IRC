@@ -28,13 +28,15 @@ std::vector<std::string> ARG_Finder(std::string msg)
     std::vector<std::string> words;
     std::string word;
 
-    std::stringstream ss(msg);
+    
+	std::stringstream ss(msg);
     ss >> word;
 	while (ss >> word) 
 	{
         words.push_back(word);
 		// std::cout << word << std::endl;
     }
+	std::cout << "msg : " << msg << std::endl;
 	return words;
 }
 
@@ -55,7 +57,7 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 	}
 
 	std::vector<std::string> argument = ARG_Finder(msg);
-
+	
 	if (cmd == "PASS")
 		return serv->PASS(client, argument);
 	// else if (!client->_registred_password)
@@ -70,11 +72,14 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 		return serv->PING(client, argument);
 	
 
-	// if (!client->_registred_user)
-	// {
-	// 	ERR(client, 1, "", "You need to register with USER and NICK command");
-	// 	return;
-	// }
+	if (!client->REGISTRED())
+	{
+		if (client->get_nick().empty()) 
+			ERR(client, 451, "*", "You have not registered");
+		else
+			ERR(client, 451, client->get_nick(), "You have not registered");
+		return;
+	}
 	if (cmd == "JOIN")
 		serv->JOIN(client, argument);
 	else if (cmd == "PRIVMSG")

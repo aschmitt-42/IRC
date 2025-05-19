@@ -36,6 +36,7 @@ class Channel
 		void	SEND_Msg(std::string msg, Client *client);
 		void	DELETE_User(Client *client);
 		void	New_User_msg(std::string msg);
+		std::string	ClientList();
 
 		//GETTER
 		std::string	GET_Topic(){return _topic;}

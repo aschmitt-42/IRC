@@ -57,3 +57,15 @@ void	Channel::SEND_Msg(std::string msg, Client *client)
 	}
 }
 
+std::string	Channel::ClientList()
+{
+	std::string client_list;
+
+	for (size_t i = 0; i < _client.size(); i++)
+	{
+		client_list += _client[i]->get_nick();
+		if (i != _client.size() - 1)
+			client_list += " ";
+	}
+	return client_list;
+}

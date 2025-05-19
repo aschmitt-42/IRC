@@ -109,60 +109,95 @@ Channel *Server::CHANNEL_Exist(std::string channel_name)
     return NULL;
 }
 
+#include <vector>
+#include <string>
+#include <sstream>
+#include <algorithm>
+
+std::vector<std::string> split(const std::string input, char delimiter)
+{
+    std::vector<std::string> result;
+    std::stringstream ss(input);
+    std::string token;
+
+    while (std::getline(ss, token, delimiter)) 
+    {
+        // Supprimer les espaces éventuels autour du token
+        token.erase(std::remove(token.begin(), token.end(), ' '), token.end());
+        if (!token.empty()) {
+            result.push_back(token);
+        }
+    }
+
+    return result;
+}
+
 void Server::JOIN(Client *client, std::vector<std::string> argument)
 {
     std::cout << "JOIN DETECTED" << std::endl;
-    // for (size_t i = 0; i < argument.size(); i++)
-    // {
-    //     std::cout << "argument[" << i << "] = " << argument[i] << std::endl;
-    // }
     
-    
-    std::string channel_name = argument[0];
+    std::vector<std::string> Names = split(argument[0], ',');
 
-    if (channel_name.empty())
+    std::string channel_name;
+    std::string msg;
+    Channel     *channel;
+
+    for (size_t i = 0; i < Names.size(); i++)
     {
-        ERR(client, 461, "JOIN", "Not enough parameters");
-        return;
+        channel_name = Names[i];
+
+        //  VERIF NOM DE CHANNEL
+        if (channel_name.empty())
+        {
+            ERR(client, 461, "JOIN", "Not enough parameters");
+            continue;
+        }
+
+        channel = CHANNEL_Exist(channel_name);
+    
+        if (!channel)
+        {
+            channel = new Channel(channel_name, "");
+            _channels.push_back(channel);
+        }
+
+
+        if (channel->Add_User(client))
+        {
+            // already in the channel
+            continue;
+        }
+
+        /// JOIN MSG 
+        client->Join_Channel(channel);
+        msg = ":" + client->get_Prefix() + " JOIN :" + channel_name ;
+        channel->New_User_msg(msg);
+
+
+        // SEND TOPIC 331 : NO TOPIC || 332 : TOPIC
+        if (channel->GET_Topic().empty())
+            msg = ":localhost 331 " + client->get_nick() + " " + channel_name + " :No topic is set";
+        else
+            msg = ":localhost 332 " + client->get_nick() + " " + channel_name + " :" + channel->GET_Topic();
+        client->Send_message(msg);
+
+
+        // SEND NAMES / @ for secret channels / * for private channels / = for others (public channels).
+        msg = ":localhost 353 " + client->get_nick() + " = " + channel_name + " :@" + channel->ClientList();
+        client->Send_message(msg);
+        std::cout << "NAMES : " << msg << std::endl;
+
+        // SEND END OF NAMES
+        msg = ":localhost 366 " + client->get_nick() + " " + channel_name + " :End of NAMES list";
+        client->Send_message(msg);
     }
+    
 
     ////////////////////////////////////////////////////////////////////////////
     // TOPIC, KEYS, PLUSIEURS CHANNELS
     ////////////////////////////////////////////////////////////////////////////
     
-    Channel *channel = CHANNEL_Exist(channel_name);
     
-    if (!channel)
-    {
-        // std::string topic = "No topic\n";
-
-        channel = new Channel(channel_name, "");
-        _channels.push_back(channel);
-    }
-    
-    
-    if (channel->Add_User(client))
-    {
-        // already in the channel
-        return;
-    }
-    std::string msg;
-
-    client->Join_Channel(channel);
-    msg = ":" + client->get_Prefix() + " JOIN :" + channel_name ;
-    channel->New_User_msg(msg);
-
-    // envoie du topic au nouveau membre
-    msg = ":localhost 331 " + client->get_nick() + " " + channel_name + " :No topic is set";
-    client->Send_message(msg);
-    
-    //reponse au client avec list des membre du channel
-    msg = ":localhost 353 " + client->get_nick() + " = " + channel_name + ":@" + client->get_nick();
-    client->Send_message(msg);
-    
-    //reponse au client pour annoncer fin de la liste
-    msg = ":localhost 366 " + client->get_nick() + " " + channel_name + " :End of NAMES list";
-    client->Send_message(msg);
 }
 // void Server::KICK(Client *client, std::vector<std::string> argument)
 // {
