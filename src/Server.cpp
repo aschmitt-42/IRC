@@ -123,7 +123,7 @@ Client* Server::FINDING_Client_str(std::string  username)
 {
     for (size_t i = 0; i < _clients.size(); ++i)
     {
-        if (_clients[i]->get_username() == username)
+        if (_clients[i]->get_nick() == username)
             return _clients[i];
     }
     return NULL;

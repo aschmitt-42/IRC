@@ -286,7 +286,7 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
     std::string new_client_name = argument[0];
     std::string channel_name = argument[1];
 
-    Client *new_client = FINDING_Client_str(new_client_name); // CHECK CLIENT EXIST
+    Client *new_client = this->FINDING_Client_str(new_client_name); // CHECK CLIENT EXIST
     if (!new_client)
         return ERR(client, 401, new_client_name, "No such nick/channel");
 
@@ -303,11 +303,15 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
     if (channel->Try_Invite(client, new_client)) // ADD NEW CLIENT TO THE INVITE LIST
         return ERR(client, 482, channel_name, "You're not channel operator");
 
-    // INVITE MESSAGE TO THE 
-    std::string msg = ":" + client->get_Prefix() + " INVITE " + new_client_name + " :" + channel_name;
+    
+    // REPLY TO THE CLIENT WHO SENT THE INVITE
+    std::string msg = ":localhost 341" + client->get_nick() + " " + new_client_name + " :" + channel_name;
+    client->Send_message(msg);
+
+
+    // INVITE MESSAGE TO THE NEW CLIENT
+    msg = ":" + client->get_Prefix() + " INVITE " + new_client_name + " " + channel_name;
     new_client->Send_message(msg);
-
-
 
 }
 
