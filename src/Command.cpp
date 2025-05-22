@@ -135,21 +135,30 @@ std::vector<std::string> split(const std::string input, char delimiter)
 void Server::JOIN(Client *client, std::vector<std::string> argument)
 {
     std::cout << "JOIN DETECTED" << std::endl;
+
+    if (argument.size() < 1)
+        return ERR(client, 461, "JOIN", "Not enough parameters");
     
     std::vector<std::string> Names = split(argument[0], ',');
+    std::vector<std::string> Keys;
+
+    if (argument.size() >= 2)
+        Keys = split(argument[1], ',');
 
     std::string channel_name;
     std::string msg;
+    std::string key;
     Channel     *channel;
 
     for (size_t i = 0; i < Names.size(); i++)
     {
         channel_name = Names[i];
-
-        //  VERIF NOM DE CHANNEL
-        if (channel_name.empty())
+        key = Keys.size() > i ? Keys[i] : "";
+        
+        //  VERIF NAME OF CHANNEL
+        if (channel_name[0] != '#' && channel_name[0] != '&')
         {
-            ERR(client, 461, "JOIN", "Not enough parameters");
+            ERR(client, 476, channel_name, "Bad Channel Mask");
             continue;
         }
 
@@ -158,15 +167,13 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
         if (!channel)
         {
             channel = new Channel(channel_name, "");
+            channel->SET_Owner(client);
             _channels.push_back(channel);
         }
 
 
-        if (channel->Add_User(client))
-        {
-            // already in the channel
+        if (channel->Add_User(client)) // already in the channel
             continue;
-        }
 
         /// JOIN MSG 
         client->Join_Channel(channel);
@@ -183,6 +190,7 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
 
 
         // SEND NAMES / @ for secret channels / * for private channels / = for others (public channels).
+        //              ou alors @ pour l'operateur
         msg = ":localhost 353 " + client->get_nick() + " = " + channel_name + " :@" + channel->ClientList();
         client->Send_message(msg);
         std::cout << "NAMES : " << msg << std::endl;
@@ -193,9 +201,9 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
     }
     
 
-    ////////////////////////////////////////////////////////////////////////////
-    // TOPIC, KEYS, PLUSIEURS CHANNELS
-    ////////////////////////////////////////////////////////////////////////////
+    ////////////
+    // KEYS   //
+    ////////////
     
     
 }

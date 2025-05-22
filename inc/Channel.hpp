@@ -26,23 +26,28 @@ class Channel
 {
 	private :
 		std::vector<Client*>	_client;
-		std::string			_name;
-		std::string			_topic;	
+		std::string				_name;
+		std::string				_topic;
+		Client					*_client_owner;
+		std::string				_key;
+		std::string				_mode;
 	public :
 		Channel(std::string channel_name, std::string topic);
 		~Channel();
 
-		int	Add_User(Client *client);
-		void	SEND_Msg(std::string msg, Client *client);
-		void	DELETE_User(Client *client);
-		void	New_User_msg(std::string msg);
 		std::string	ClientList();
+		void		SEND_Msg(std::string msg, Client *client);
+		void		DELETE_User(Client *client);
+		void		New_User_msg(std::string msg);
+		int			Add_User(Client *client);
 
 		//GETTER
 		std::string	GET_Topic(){return _topic;}
 		std::string	GET_Name(){return _name;}
+		Client*		GET_Owner(){return _client_owner;}
 
 		void		SET_Topic(std::string new_topic){_topic = new_topic;}
+		void		SET_Owner(Client *client){_client_owner = client;}
 };
 
 // std::ostream& operator<<(std::ostream& os, const Client& other);

@@ -55,5 +55,5 @@ void	ERR(Client *client, int err_id, std::string command, std::string msg)
 	else
         err_msg = ":localhost " + intToString(err_id) + " " + command + " :" + msg;
 	client->Send_message(err_msg);
-
+    
 }
