@@ -43,3 +43,4 @@ release/
 *.xcodeproj/
 *.DS_Store
 
+ircserv
