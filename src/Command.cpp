@@ -109,10 +109,6 @@ Channel *Server::CHANNEL_Exist(std::string channel_name)
     return NULL;
 }
 
-#include <vector>
-#include <string>
-#include <sstream>
-#include <algorithm>
 
 std::vector<std::string> split(const std::string input, char delimiter)
 {
@@ -155,10 +151,15 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
         channel_name = Names[i];
         key = Keys.size() > i ? Keys[i] : "";
         
-        //  VERIF NAME OF CHANNEL
-        if (channel_name[0] != '#' && channel_name[0] != '&')
+        if (channel_name[0] != '#' && channel_name[0] != '&') 
         {
             ERR(client, 476, channel_name, "Bad Channel Mask");
+            continue;
+        }
+
+        if (channel_name.length() > 50)
+        {
+            ERR(client, 403, client->get_nick() + " " + channel_name , "No such channel");
             continue;
         }
 
@@ -166,18 +167,19 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
     
         if (!channel)
         {
-            channel = new Channel(channel_name, "");
-            channel->SET_Owner(client);
+            channel = new Channel(channel_name, "", client);
+            // channel->SET_Owner(client);
             _channels.push_back(channel);
         }
-
+        else if (channel->Try_Join(client, key)) // Probleme pour entrer dans le channel  full/invite/password
+            continue;
 
         if (channel->Add_User(client)) // already in the channel
             continue;
 
         /// JOIN MSG 
         client->Join_Channel(channel);
-        msg = ":" + client->get_Prefix() + " JOIN :" + channel_name ;
+        msg = ":" + client->get_Prefix() + " JOIN :" + channel_name;
         channel->New_User_msg(msg);
 
 
@@ -193,7 +195,6 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
         //              ou alors @ pour l'operateur
         msg = ":localhost 353 " + client->get_nick() + " = " + channel_name + " :@" + channel->ClientList();
         client->Send_message(msg);
-        std::cout << "NAMES : " << msg << std::endl;
 
         // SEND END OF NAMES
         msg = ":localhost 366 " + client->get_nick() + " " + channel_name + " :End of NAMES list";
@@ -207,6 +208,110 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
     
     
 }
+
+
+void Server::MessageRegister(Client *client)
+{
+    std::string msg;
+    
+    msg = ":localhost 001 " + client->get_nick() + " :Welcome to the ft_irc network " + client->get_Prefix() + "";
+    client->Send_message(msg);
+    
+    msg = ":localhost 002 " + client->get_nick() + " :Your host is localhost, running version 1.0";
+    client->Send_message(msg);
+
+    msg = ":localhost 003 " + client->get_nick() + " :This server was created in 2025"; 
+    client->Send_message(msg);
+    
+    msg = ":localhost 004 " + client->get_nick() + " localhost 1.0 : o o";
+    client->Send_message(msg);
+    
+    msg = ":localhost 375 " + client->get_nick() + " :- ft_irc Message of the day -";
+    client->Send_message(msg);
+    
+    msg = ":localhost 372 " + client->get_nick() + " :Welcome to the ircsev server";
+    client->Send_message(msg);
+    
+    msg = ":localhost 376 " + client->get_nick() + " :End of MOTD command";
+    client->Send_message(msg);
+}
+
+void Server::PING(Client *client, std::vector<std::string> argument)
+{
+    std::cout << "PING DETECTED" << std::endl;
+    std::string msg;
+    if (argument.size() < 1)
+    msg = ":localhost PONG :";
+    else
+    msg = ":localhost PONG :" + argument[0];
+    client->Send_message(msg);
+}
+
+void Server::PRIVMSG(Client *client, std::vector<std::string> argument)
+{
+    std::string msg;
+    
+    // if (argument.size() < 2)
+    //     return ERR(client, 461, "PRIVMSG", "Not enough parameters");
+    
+    if (argument[0][0] == '#') // ou autre caractere accepter de debut de channel
+    {
+        std::cout << "PRIVMSG TO CHANNEL "<< std::endl;
+        Channel *channel = CHANNEL_Exist(argument[0]);
+        if (!channel)
+        return ERR(client, 403, argument[0], "No such channel");
+        msg = ":" + client->get_nick() + "!" + client->get_username() + "@" + "localhost";
+        msg += " PRIVMSG " + argument[0] + " " + argument[1];
+        channel->SEND_Msg(msg, client);
+    }
+    else
+    {
+        std::cout << "PRIVMSG DIRECT TO ANOTHER CLIENT "<< std::endl;
+        Client *target_client = FINDING_Client_str(argument[0]);
+        if (!target_client)
+        return ERR(client, 401, argument[0], "No such nick/channel");
+        msg = ":" + client->get_Prefix() + " PRIVMSG " + target_client->get_nick() + " :" + argument[1];
+        client->Send_message(msg);
+    }
+}
+
+
+void Server::INVITE(Client *client, std::vector<std::string> argument)
+{
+    std::cout << "INVITE DETECTED" << std::endl;
+
+    if (argument.size() < 2)
+        return ERR(client, 461, "INVITE", "Not enough parameters");
+
+    std::string new_client_name = argument[0];
+    std::string channel_name = argument[1];
+
+    Client *new_client = FINDING_Client_str(new_client_name); // CHECK CLIENT EXIST
+    if (!new_client)
+        return ERR(client, 401, new_client_name, "No such nick/channel");
+
+    Channel *channel = CHANNEL_Exist(channel_name); // CHECK CHANNEL EXIST
+    if (!channel)
+        return ERR(client, 403, channel_name, "No such channel");
+    
+    if (channel->Client_in_Channel(client->get_nick()) == 0) // CHECK IF CLIENT WHO SENT MESSAGE IS IN THE CHANNEL
+        return ERR(client, 442, channel_name, "You're not on that channel");
+    
+    if (channel->Client_in_Channel(new_client_name) == 1) // CHECK IF NEW CLIENT IS IN THE CHANNEL
+        return ERR(client, 443, new_client_name + " " + channel_name, "is already on channel ");
+    
+    if (channel->Try_Invite(client, new_client)) // ADD NEW CLIENT TO THE INVITE LIST
+        return ERR(client, 482, channel_name, "You're not channel operator");
+
+    // INVITE MESSAGE TO THE 
+    std::string msg = ":" + client->get_Prefix() + " INVITE " + new_client_name + " :" + channel_name;
+    new_client->Send_message(msg);
+
+
+
+}
+
+
 // void Server::KICK(Client *client, std::vector<std::string> argument)
 // {
 //     std::cout << "KICK DETECTED ON " << argument[0] << std::endl;
@@ -237,12 +342,8 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
 //     (void)status;
 //     (void)kicked_user;
 // }
-void Server::INVITE(Client *client, std::vector<std::string> argument)
-{
-    std::cout << "INVITE DETECTED ON " << argument[0] << std::endl;
-    if (!client->is_operator())
-        return;
-}
+
+
 // void Server::TOPIC(Client *client, std::vector<std::string> argument)
 // {
 //     std::cout << "TOPIC DETECTED" << std::endl;;
@@ -273,86 +374,9 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
 //     (void)argument;
 // }
 
-void Server::MODE(Client *client, std::vector<std::string> argument)
-{
-    std::cout << "MODE " << argument[0] << " DETECTED" << std::endl;
-    if (!client->is_operator())
-        return;
-}
-
-
-void Server::MessageRegister(Client *client)
-{
-    std::string msg;
-
-    msg = ":localhost 001 " + client->get_nick() + " :Welcome to the ft_irc network " + client->get_Prefix() + "";
-    client->Send_message(msg);
-
-    msg = ":localhost 002 " + client->get_nick() + " :Your host is localhost, running version 1.0";
-    client->Send_message(msg);
-
-    msg = ":localhost 003 " + client->get_nick() + " :This server was created 2023-10-01";
-    client->Send_message(msg);
-
-    msg = ":localhost 004 " + client->get_nick() + " localhost 1.0 : o o";
-    client->Send_message(msg);
-    
-    msg = ":localhost 375 " + client->get_nick() + " :- ft_irc Message of the day -";
-    client->Send_message(msg);
-    
-    msg = ":localhost 372 " + client->get_nick() + " :Welcome to the ft_irc server";
-    client->Send_message(msg);
-    
-    msg = ":localhost 376 " + client->get_nick() + " :End of MOTD command";
-    client->Send_message(msg);
-
-    /*
-    Message de registration
-    :localhost 001 <nick> :Welcome to the ft_irc network
-    :localhost 002 <nick> :Your host is localhost, running version 1.0
-    :localhost 003 <nick> :This server was created 2023-10-01
-    :localhost 004 <nick> localhost 1.0 :<user modes> <channel modes>
-    375
-    372
-    376
-    */
-}
-
-void Server::PING(Client *client, std::vector<std::string> argument)
-{
-    std::cout << "PING DETECTED" << std::endl;
-    std::string msg;
-    if (argument.size() < 1)
-        msg = ":localhost PONG :";
-    else
-        msg = ":localhost PONG :" + argument[0];
-    client->Send_message(msg);
-}
-
-void Server::PRIVMSG(Client *client, std::vector<std::string> argument)
-{
-    std::string msg;
-
-    // if (argument.size() < 2)
-    //     return ERR(client, 461, "PRIVMSG", "Not enough parameters");
-    
-    if (argument[0][0] == '#') // ou autre caractere accepter de debut de channel
-    {
-        std::cout << "PRIVMSG TO CHANNEL "<< std::endl;
-        Channel *channel = CHANNEL_Exist(argument[0]);
-        if (!channel)
-            return ERR(client, 403, argument[0], "No such channel");
-        msg = ":" + client->get_nick() + "!" + client->get_username() + "@" + "localhost";
-        msg += " PRIVMSG " + argument[0] + " " + argument[1];
-        channel->SEND_Msg(msg, client);
-    }
-    else
-    {
-        std::cout << "PRIVMSG DIRECT TO ANOTHER CLIENT "<< std::endl;
-        Client *target_client = FINDING_Client_str(argument[0]);
-        if (!target_client)
-            return ERR(client, 401, argument[0], "No such nick/channel");
-        msg = ":" + client->get_Prefix() + " PRIVMSG " + target_client->get_nick() + " :" + argument[1];
-        client->Send_message(msg);
-    }
-}
+// void Server::MODE(Client *client, std::vector<std::string> argument)
+// {
+//     std::cout << "MODE " << argument[0] << " DETECTED" << std::endl;
+//     if (!client->is_operator())
+//         return;
+// }

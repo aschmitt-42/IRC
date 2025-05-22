@@ -47,13 +47,17 @@ std::string intToString(int number)
 
 void	ERR(Client *client, int err_id, std::string command, std::string msg)
 {
-	if (!client)
-		return;
+    std::cout << "ERR DETECTED ID:"  << err_id << std::endl;
+    
     std::string err_msg;
+    
+	if (!client)
+        return;
+    
 	if (command.empty())
         err_msg = ":localhost " + intToString(err_id) + " :" + msg;
 	else
         err_msg = ":localhost " + intToString(err_id) + " " + command + " :" + msg;
+
 	client->Send_message(err_msg);
-    
 }

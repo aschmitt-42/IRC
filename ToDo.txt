@@ -1,25 +1,44 @@
 #To Do List
 
 [ ] Finir commande JOIN
-    - [ ] verifier si le client est deja dans le channel
-    - [ ] plusieur channel
-    - [ ] verifier 1er caractere
+    - [x] verifier si le client est deja dans le channel
+    - [x] plusieur channel
+    - [x] verifier syntax du nom
+    - [ ] Invitation a faire
+    - [ ] PAS A FAIRE argument spécial ("0") --> Demande de quitter tout les cannaux dont l'utilisateur est actuellement membre
 
 [ ] Finir PRIVMSG
     - [ ] test pour envoie a un client seul
     - [ ] les arguments qui du coup enleve les espaces
     - [ ] 
 
-[ ] voir les differents REVENTS :
-    - [ ] POLLHERR
-    - [ ] POLLHUP
-    - [ ] POLLIN
-    - [ ] ...
+[ ] Invite commande 
+    - [ ] ERR_NEEDMOREPARAMS    461 : "<command> :Not enough parameters"            
+    - [ ] ERR_NOSUCHNICK        401 : "<nickname> :No such nick/channel"            - Used to indicate the nickname parameter supplied to a command is currently unused.
+    - [ ] ERR_NOSUCHCHANNEL     403 : "<channel name> :No such channel"             - Used to indicate the given channel name is invalid.
+    - [ ] ERR_NOTONCHANNEL      442 : "<channel> :You're not on that channel"       - Returned by the server whenever a client tries to perform a channel affecting command for which the client isn't a member.
+    - [ ] ERR_USERONCHANNEL     443 : "<user> <channel> :is already on channel"     - Returned when a client tries to invite a user to a channel they are already on.
+    - [ ] ERR_CHANOPRIVSNEEDED  482 : "<channel> :You're not channel operator"      - Commande need to be use by operator
+    -----REPONSE------
+    - [ ] RPL_INVITING
+    - [ ] RPL_AWAY
+
+[ ] Msg de hexchat
+    - [ ] CAP LS 302
+
+[ ] Finir PING PONG 
+    - [ ] Envoyer des ping toute les 60sec pour voir si le client et toujours la ????? 
+    - [ ] 
+    - [ ] 
+// Ton serveur doit envoyer un PING périodiquement après une période d'inactivité, c’est-à-dire quand le client n'a rien envoyé depuis un certain temps.
 
 
-
-CONTINUE
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////                                                     TEST                                                                                   ///////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    - [ ] Join channel FULL                     :localhost 471 <channel> :Cannot join channel (+l)
+    - [ ] Join channel ou pas invite            :localhost 473 <channel> :Cannot join channel (+i)
+    - [ ] Join channel avec pas bon password    :localhost 475 <channel> :Cannot join channel (+b)
 
 
 

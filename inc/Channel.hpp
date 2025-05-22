@@ -25,14 +25,17 @@
 class Channel
 {
 	private :
+		std::vector<char>		_mode;
 		std::vector<Client*>	_client;
+		std::vector<Client*>	_invite;
 		std::string				_name;
 		std::string				_topic;
+		std::string				_password;
 		Client					*_client_owner;
-		std::string				_key;
-		std::string				_mode;
+		size_t					_nb_max_user;
+
 	public :
-		Channel(std::string channel_name, std::string topic);
+		Channel(std::string channel_name, std::string topic, Client *client);
 		~Channel();
 
 		std::string	ClientList();
@@ -40,6 +43,10 @@ class Channel
 		void		DELETE_User(Client *client);
 		void		New_User_msg(std::string msg);
 		int			Add_User(Client *client);
+		int			Try_Join(Client *client, std::string key);
+		int			Client_in_Channel(std::string client_name);
+		int			Try_Invite(Client *client, Client *new_client);
+		;
 
 		//GETTER
 		std::string	GET_Topic(){return _topic;}
@@ -50,6 +57,9 @@ class Channel
 		void		SET_Owner(Client *client){_client_owner = client;}
 };
 
-// std::ostream& operator<<(std::ostream& os, const Client& other);
+
+#define LIMITE_USER			'l'
+#define INVITE_ONLY			'i'
+#define PASSWORD			'k'
 
 #endif

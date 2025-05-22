@@ -3,7 +3,6 @@
 
 Client::Client(pollfd client_poll, int client_fd)
 {
-	_operator = 0;
 	_client_fd = client_fd;
 	
 	_client_poll = client_poll;
