@@ -28,6 +28,8 @@ void Client::Send_message(std::string msg)
 	// std::cout <<  msg << std::endl;
 	// std::cout << "------------------------" << std::endl;
 
+	std::cout << "MSG " << msg << std::endl;
+
 	if (send(_client_fd, msg.c_str(), msg.size(), 0) == -1)
 	{
 		std::cerr << "Error sending message to client" << std::endl;

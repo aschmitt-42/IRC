@@ -24,10 +24,12 @@ void Server::PASS(Client *client, std::vector<std::string> argument)
     if (argument[0] != _password)
         return ERR(client, 464, "","Password incorrect");
 
-    client->_registred_password = 1;
-    client->Send_message("Password valid, welcome");
-    if (client->REGISTRED())
+    // client->Send_message("Password valid, welcome");
+
+    if (client->_registred_user && client->_registred_password == 0 && !client->get_nick().empty())
         MessageRegister(client);
+            
+    client->_registred_password = 1;
     
 }
 
@@ -48,10 +50,15 @@ void Server::NICK(Client *client, std::vector<std::string>argument)
     // if (client->get_nick() != "") --> a deja un nick donc le change
     //      envoyer message comme quoi il a changer de nick a tout les client register
 
-    client->SET_Nick(argument[0]);
+    
 
-    if (client->REGISTRED())
+    if (client->_registred_user && client->_registred_password && client->get_nick().empty())
+    {
+        client->SET_Nick(argument[0]);
         MessageRegister(client);
+    }
+    else
+        client->SET_Nick(argument[0]);
 
     // PAS SUR client->Send_message("Nick valid, welcome " + argument[0]);
 
@@ -85,9 +92,10 @@ void Server::USER(Client *client, std::vector<std::string>argument)
 
     client->SET_Username(argument);
     // client->Send_message("Username valid, welcome" + argument[0]);
-    client->_registred_user = 1;
-    if (client->REGISTRED())
+    
+    if (client->_registred_user == 0 && client->_registred_password == 1 && !client->get_nick().empty())
         MessageRegister(client);
+    client->_registred_user = 1;
 }
 
 void Server::QUIT(Client *client, std::vector<std::string>argument)
@@ -316,6 +324,98 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
 }
 
 
+void Server::MODE(Client *client, std::vector<std::string> argument)
+{
+    std::cout << "MODE DETECTED" << std::endl;
+
+    if (argument.size() < 1)
+        return ERR(client, 461, "MODE", "Not enough parameters");
+
+    std::string channel_name = argument[0];
+    std::string msg;
+    
+    Channel *channel = CHANNEL_Exist(channel_name); // CHECK CHANNEL EXIST
+    if (!channel)
+        return ERR(client, 403, channel_name, "No such channel");
+    
+    if (channel->Client_in_Channel(client->get_nick()) == 0) // CHECK IF CLIENT IS IN THE CHANNEL
+        return ERR(client, 442, channel_name, "You're not on that channel");
+    
+    if (channel->Is_Operator(client) == 0) // CHECK IF CLIENT IS OPERATOR
+        return ERR(client, 482, channel_name, "You're not channel operator");
+    
+    if (argument.size() == 1) // MODE WITHOUT PARAMETER RETURN ALL THE MODE
+    {
+        msg = ":localhost 324 " + client->get_nick() + " " + channel_name;
+        msg += "+ i";
+        // msg += channel->GET_Mode_List();
+        client->Send_message(msg);
+        return;
+    }
+
+    std::string mode = argument[1];
+    
+    if (mode == "+i")
+    {
+        channel->SET_Owner(client);
+        channel->SET_Topic("secret");
+    }
+    else if (mode == "-i")
+    {
+        channel->SET_Owner(NULL);
+        channel->SET_Topic("");
+    }
+    else if (mode == "+k")
+    {
+        if (argument.size() < 3)
+            return ERR(client, 461, "MODE", "Not enough parameters");
+        // channel->SET_Password(argument[2]);
+    }
+    else if (mode == "-k")
+    {
+        // channel->SET_Password("");
+    }
+    else if (mode == "+l")
+    {
+        if (argument.size() < 3)
+            return ERR(client, 461, "MODE", "Not enough parameters");
+        // channel->SET_Max_User(std::atoi(argument[2].c_str()));
+    }
+    else if (mode == "-l")
+    {
+        // channel->SET_Max_User(0);
+    }
+    else if (mode == "+t")
+    {
+        // channel->SET_Topic("secret");
+    }
+    else if (mode == "-t")
+    {
+        // channel->SET_Topic("");
+    }
+    else if (mode == "+o")
+    {
+        if (argument.size() < 3)
+            return ERR(client, 461, "MODE", "Not enough parameters");
+        Client *target_client = this->FINDING_Client_str(argument[2]);
+        if (!target_client)
+            return ERR(client, 401, argument[2], "No such nick/channel");
+        channel->Try_Invite(client, target_client);
+    }
+    else if (mode == "-o")
+    {
+        if (argument.size() < 3)
+            return ERR(client, 461, "MODE", "Not enough parameters");
+        Client *target_client = this->FINDING_Client_str(argument[2]);
+        if (!target_client)
+            return ERR(client, 401, argument[2], "No such nick/channel");
+        channel->Try_Invite(client, target_client);
+    }
+    else
+        return ERR(client, 472, mode, "is unknown mode char to me for /channel");
+
+}
+
 // void Server::KICK(Client *client, std::vector<std::string> argument)
 // {
 //     std::cout << "KICK DETECTED ON " << argument[0] << std::endl;
@@ -376,11 +476,4 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
 //     }
 //     (void)status;
 //     (void)argument;
-// }
-
-// void Server::MODE(Client *client, std::vector<std::string> argument)
-// {
-//     std::cout << "MODE " << argument[0] << " DETECTED" << std::endl;
-//     if (!client->is_operator())
-//         return;
 // }

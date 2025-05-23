@@ -123,3 +123,21 @@ int	Channel::Try_Invite(Client *client, Client *new_client)
 
 	return 0;
 }
+
+int	Channel::Is_Operator(Client *client)
+{
+	if (client->get_nick() == _client_owner->get_nick())
+		return 1;
+	return 0;
+}
+
+std::string Channel::GET_Mode_List()
+{
+	std::string mode_list;
+	for (size_t i = 0; i < _mode.size(); i++)
+	{
+		mode_list += _mode[i];
+	}
+	
+	return mode_list;
+}

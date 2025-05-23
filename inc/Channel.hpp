@@ -46,20 +46,16 @@ class Channel
 		int			Try_Join(Client *client, std::string key);
 		int			Client_in_Channel(std::string client_name);
 		int			Try_Invite(Client *client, Client *new_client);
-		;
+		int			Is_Operator(Client *client);
 
 		//GETTER
 		std::string	GET_Topic(){return _topic;}
 		std::string	GET_Name(){return _name;}
 		Client*		GET_Owner(){return _client_owner;}
-
+		std::string GET_Mode_List();
+		
 		void		SET_Topic(std::string new_topic){_topic = new_topic;}
 		void		SET_Owner(Client *client){_client_owner = client;}
 };
-
-
-#define LIMITE_USER			'l'
-#define INVITE_ONLY			'i'
-#define PASSWORD			'k'
 
 #endif

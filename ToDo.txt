@@ -23,6 +23,9 @@
     - [ ] RPL_INVITING
     - [ ] RPL_AWAY
 
+[ ] MODE
+    - [ ] Mode avec que le nom du channel Envoyer tout les modes
+
 [ ] Msg de hexchat
     - [ ] CAP LS 302
 
