@@ -25,7 +25,6 @@ class Channel;
 class Client
 {
 	private :
-		int						_operator;
 		int						_client_fd;
 
 
@@ -48,7 +47,6 @@ class Client
 
 		void	Join_Channel(Channel *channel);
 		// void	DELETE_Channel(){_channel = NULL;}
-		void	OPERATOR(){_operator = 1;}
 
 		void	Send_message(std::string msg);
 		int		REGISTRED();
@@ -63,7 +61,6 @@ class Client
 		pollfd			get_pollfd(){return _client_poll;}
 		// Channel			*get_channel(){return _channel;}
 		int				get_clientfd(){return _client_fd;}
-		int				is_operator(){return _operator;}
 
 		//SETTER
 		void			SET_Nick(std::string nick){_nickname = nick;}

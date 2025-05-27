@@ -102,7 +102,6 @@ void Server::read_data_from_socket(Client *client)
         std::string cmd(msg.c_str(), position);
         if (cmd[cmd.size() - 1] == '\r')
             cmd.erase(cmd.size() - 1);
-        // std::cout << "MESSAGE :" << cmd << std::endl;
         
         IRC_Parser(cmd, this, client);
         msg.erase(0, position + 1);
@@ -124,7 +123,7 @@ Client* Server::FINDING_Client_str(std::string  username)
 {
     for (size_t i = 0; i < _clients.size(); ++i)
     {
-        if (_clients[i]->get_username() == username)
+        if (_clients[i]->get_nick() == username)
             return _clients[i];
     }
     return NULL;

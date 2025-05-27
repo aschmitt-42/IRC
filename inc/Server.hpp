@@ -19,20 +19,20 @@
 # include <sys/types.h>
 # include <poll.h>
 # include <sys/poll.h>
-
 # include <vector>
-
 # include <sstream>
+# include <algorithm>
+
 
 class Server
 {
 	private :
 		int						_server_socket;
-		std::string				_port;
+		std::string				_port; 
 		std::string				_password;
 		std::vector<pollfd>		_poll_fds;		// Tableau des descripteur
-		std::vector<Client*>	_clients;	// Tableau des clients
-		std::vector<Channel*>	_channels;
+		std::vector<Client*>	_clients;		// Tableau des clients
+		std::vector<Channel*>	_channels;		// Tableau des channels existant
 
 		void read_data_from_socket(Client *client);
 		void accept_new_connection();

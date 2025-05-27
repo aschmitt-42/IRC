@@ -25,25 +25,36 @@
 class Channel
 {
 	private :
+		std::vector<char>		_mode;
 		std::vector<Client*>	_client;
-		std::string			_name;
-		std::string			_topic;	
+		std::vector<Client*>	_invite;
+		std::vector<Client*>	_operator;
+		std::string				_name;
+		std::string				_topic;
+		std::string				_password;
+		// Client					*_client_owner;
+		size_t					_nb_max_user;
+
 	public :
-		Channel(std::string channel_name, std::string topic);
+		Channel(std::string channel_name, std::string topic, Client *client);
 		~Channel();
 
-		int	Add_User(Client *client);
-		void	SEND_Msg(std::string msg, Client *client);
-		void	DELETE_User(Client *client);
-		void	New_User_msg(std::string msg);
+		std::string	ClientList();
+		void		SEND_Msg(std::string msg, Client *client);
+		void		DELETE_User(Client *client);
+		void		New_User_msg(std::string msg);
+		int			Add_User(Client *client);
+		int			Try_Join(Client *client, std::string key);
+		int			Client_in_Channel(std::string client_name);
+		int			Try_Invite(Client *client, Client *new_client);
+		int			Is_Operator(Client *client);
 
 		//GETTER
 		std::string	GET_Topic(){return _topic;}
 		std::string	GET_Name(){return _name;}
-
+		std::string GET_Mode_List();
+		
 		void		SET_Topic(std::string new_topic){_topic = new_topic;}
 };
-
-// std::ostream& operator<<(std::ostream& os, const Client& other);
 
 #endif

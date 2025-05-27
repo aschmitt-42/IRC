@@ -13,7 +13,7 @@ std::string CMD_Finder(std::string msg)
 	{
 		cmd = msg.substr(0, pos);
 		std::string possible_cmd[12] = {"PASS", "NICK", "USER", "QUIT", "PONG", "PING", "PRIVMSG", "KICK", "JOIN", "TOPIC", "INVITE", "MODE"};
-		for (size_t i = 0; i != 9; i++)
+		for (size_t i = 0; i != 12; i++)
 		{
 			if (cmd == possible_cmd[i])
 				return cmd;
@@ -28,7 +28,8 @@ std::vector<std::string> ARG_Finder(std::string msg)
     std::vector<std::string> words;
     std::string word;
 
-    std::stringstream ss(msg);
+    
+	std::stringstream ss(msg);
     ss >> word;
 	while (ss >> word) 
 	{
@@ -47,15 +48,20 @@ std::vector<std::string> ARG_Finder(std::string msg)
 
 void IRC_Parser(std::string msg, Server *serv, Client *client)
 {
+	std::cout << "\n\n--------IRC_PARSER--------" << std::endl;
+	std::cout << msg << std::endl;
+	std::cout << "--------------------------" << std::endl;
+
 	std::string cmd = CMD_Finder(msg);
 	if (cmd.empty() && client->_registred_user)
 	{
+		std::cout << "CMD EMPTY" << std::endl;
 		// PRINT_Msg(msg, serv, client);
 		return;
 	}
 
 	std::vector<std::string> argument = ARG_Finder(msg);
-
+	
 	if (cmd == "PASS")
 		return serv->PASS(client, argument);
 	// else if (!client->_registred_password)
@@ -70,21 +76,26 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 		return serv->PING(client, argument);
 	
 
-	// if (!client->_registred_user)
-	// {
-	// 	ERR(client, 1, "", "You need to register with USER and NICK command");
-	// 	return;
-	// }
+	if (!client->REGISTRED())
+	{
+		if (client->get_nick().empty()) 
+			ERR(client, 451, "*", "You have not registered");
+		else
+			ERR(client, 451, client->get_nick(), "You have not registered");
+		return;
+	}
+	
 	if (cmd == "JOIN")
 		serv->JOIN(client, argument);
 	else if (cmd == "PRIVMSG")
 		return serv->PRIVMSG(client, argument);
+	else if (cmd == "INVITE")
+		serv->INVITE(client, argument);
+	else if (cmd == "MODE")
+		serv->MODE(client, argument);
 	// else if (cmd == "KICK")
 	// 	serv->KICK(client, argument);
-	// else if (cmd == "INVITE")
-	// 	serv->INVITE(client, argument);
 	// else if (cmd == "TOPIC")
 	// 	serv->TOPIC(client, argument);
-	// else if (cmd == "MODE")
-	// 	serv->MODE(client, argument);
+	
 }

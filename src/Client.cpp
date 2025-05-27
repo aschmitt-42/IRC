@@ -3,7 +3,6 @@
 
 Client::Client(pollfd client_poll, int client_fd)
 {
-	_operator = 0;
 	_client_fd = client_fd;
 	
 	_client_poll = client_poll;
@@ -29,6 +28,8 @@ void Client::Send_message(std::string msg)
 	// std::cout <<  msg << std::endl;
 	// std::cout << "------------------------" << std::endl;
 
+	std::cout << "MSG " << msg << std::endl;
+
 	if (send(_client_fd, msg.c_str(), msg.size(), 0) == -1)
 	{
 		std::cerr << "Error sending message to client" << std::endl;
@@ -46,6 +47,7 @@ void	Client::SET_Username(std::vector<std::string> argument)
 {
 	_username = argument[0];
 	_mode = std::atoi(argument[1].c_str());
+	_hostname = "localhost";
 	_realname = argument[3];
 }
 
