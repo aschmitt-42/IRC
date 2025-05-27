@@ -9,8 +9,23 @@
 
 [ ] Finir PRIVMSG
     - [ ] test pour envoie a un client seul
-    - [ ] les arguments qui du coup enleve les espaces
+    - [ ] message avec des epaces n'envoie que le 1er mot
     - [ ] 
+
+
+[ ] MODE
+    - [ ] Mode avec que le nom du channel Envoyer tout les modes
+    - [ ] implementer tout l'ajout et la supression des modes
+
+
+[ ] Msg de hexchat
+    - [ ] CAP LS 302
+
+[ ] Finir PING PONG 
+    - [ ] Envoyer des ping toute les 60sec pour voir si le client et toujours la ????? 
+    - [ ] 
+    - [ ] 
+// Ton serveur doit envoyer un PING périodiquement après une période d'inactivité, c’est-à-dire quand le client n'a rien envoyé depuis un certain temps.
 
 [ ] Invite commande 
     - [ ] ERR_NEEDMOREPARAMS    461 : "<command> :Not enough parameters"            
@@ -23,22 +38,10 @@
     - [ ] RPL_INVITING
     - [ ] RPL_AWAY
 
-[ ] MODE
-    - [ ] Mode avec que le nom du channel Envoyer tout les modes
-
-[ ] Msg de hexchat
-    - [ ] CAP LS 302
-
-[ ] Finir PING PONG 
-    - [ ] Envoyer des ping toute les 60sec pour voir si le client et toujours la ????? 
-    - [ ] 
-    - [ ] 
-// Ton serveur doit envoyer un PING périodiquement après une période d'inactivité, c’est-à-dire quand le client n'a rien envoyé depuis un certain temps.
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////                                                     TEST                                                                                   ///////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     - [ ] Join channel FULL                     :localhost 471 <channel> :Cannot join channel (+l)
     - [ ] Join channel ou pas invite            :localhost 473 <channel> :Cannot join channel (+i)
     - [ ] Join channel avec pas bon password    :localhost 475 <channel> :Cannot join channel (+b)

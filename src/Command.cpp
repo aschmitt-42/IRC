@@ -357,12 +357,12 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
     
     if (mode == "+i")
     {
-        channel->SET_Owner(client);
+        // channel->SET_Owner(client);
         channel->SET_Topic("secret");
     }
     else if (mode == "-i")
     {
-        channel->SET_Owner(NULL);
+        // channel->SET_Owner(NULL);
         channel->SET_Topic("");
     }
     else if (mode == "+k")

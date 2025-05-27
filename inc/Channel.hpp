@@ -28,10 +28,11 @@ class Channel
 		std::vector<char>		_mode;
 		std::vector<Client*>	_client;
 		std::vector<Client*>	_invite;
+		std::vector<Client*>	_operator;
 		std::string				_name;
 		std::string				_topic;
 		std::string				_password;
-		Client					*_client_owner;
+		// Client					*_client_owner;
 		size_t					_nb_max_user;
 
 	public :
@@ -51,11 +52,9 @@ class Channel
 		//GETTER
 		std::string	GET_Topic(){return _topic;}
 		std::string	GET_Name(){return _name;}
-		Client*		GET_Owner(){return _client_owner;}
 		std::string GET_Mode_List();
 		
 		void		SET_Topic(std::string new_topic){_topic = new_topic;}
-		void		SET_Owner(Client *client){_client_owner = client;}
 };
 
 #endif

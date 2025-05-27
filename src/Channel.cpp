@@ -7,8 +7,8 @@ Channel::Channel(std::string channel_name, std::string topic_name, Client *clien
 	_name = channel_name;
 	_topic = topic_name;
 	_password = "";
-	_nb_max_user = -1; 
-	_client_owner = client;
+	_nb_max_user = -1;
+	_operator.push_back(client);
 }
 Channel::~Channel(){}
 
@@ -57,13 +57,13 @@ void	Channel::SEND_Msg(std::string msg, Client *client)
 	}
 }
 
-std::string	Channel::ClientList()
+std::string	Channel::ClientList() // rajouter @ pour operateur
 {
 	std::string client_list;
 
 	for (size_t i = 0; i < _client.size(); i++)
 	{
-		if (_client_owner->get_nick() == _client[i]->get_nick())
+		
 		client_list += _client[i]->get_nick();
 		if (i != _client.size() - 1)
 			client_list += " ";
@@ -115,7 +115,7 @@ int	Channel::Try_Invite(Client *client, Client *new_client)
 		}
 	}
 
-	if (i && client->get_nick() != _client_owner->get_nick()) // mode 'invite_only' et client pas operateur alors erreur pour inviter quelqu'un
+	if (i && !this->Is_Operator(client)) // mode 'invite_only' et client pas operateur alors erreur pour inviter quelqu'un
 		return 1;
 	
 	// PAS DE PROBLEME POUR INVITER
@@ -126,8 +126,11 @@ int	Channel::Try_Invite(Client *client, Client *new_client)
 
 int	Channel::Is_Operator(Client *client)
 {
-	if (client->get_nick() == _client_owner->get_nick())
-		return 1;
+	for (size_t i = 0; i < _operator.size(); i++)
+	{
+		if (_operator[i]->get_nick() == client->get_nick())
+			return 1;
+	}
 	return 0;
 }
 
