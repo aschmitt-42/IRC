@@ -144,3 +144,68 @@ std::string Channel::GET_Mode_List()
 	
 	return mode_list;
 }
+
+
+/////////////////    MOD     /////////////////
+
+
+void Channel::INVITE_Only(bool add)
+{
+	if (add)
+		_invite_only = true;
+	else 
+		_invite_only = false;
+}
+
+void Channel::TOPIC_Restriction(bool add)
+{
+	if (add)
+		_topic_restriction = true;
+	else 
+		_topic_restriction = false;
+}
+
+void Channel::CHANGE_Pass(bool add, std::vector<std::string> argument)
+{
+	if (add)//faut il verifier quil y ait un mdp ou meme un mot de passe vide fonctionne
+		_password = argument[0];
+	else
+		_password = "";
+}
+
+void Channel::CHANGE_Operator(Client *client, Server *serv, bool add, std::vector<std::string> argument)
+{
+	Client *target_client = serv->FINDING_Client_str(argument[0]);
+    if (!target_client)
+        return ERR(client, 401, argument[2], "No such nick/channel");
+    for (size_t i = 0; i < _operator.size(); ++i)
+	{
+		if (target_client == _operator[i])
+			_operator.erase(_operator.begin() + i);
+	}
+	if (add == true)
+		_operator.push_back(target_client);
+}
+
+void Channel::USER_Limit(bool add, std::vector<std::string> argument)
+{
+	if (add == false)
+		_nb_max_user = 0;
+	else
+	{
+		int nb_limit;
+		std::istringstream iss(argument[0]);
+		iss >> nb_limit;
+		if (!iss.fail() && iss.eof())
+		{
+			if (nb_limit < 1)
+			{
+				//err nombre trop petit
+				return;
+			}
+			_nb_max_user = nb_limit;
+		}
+		//else
+			//err conversion rate
+	}
+}

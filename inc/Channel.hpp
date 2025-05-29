@@ -21,6 +21,20 @@
 # include <vector>
 # include "Client.hpp"
 
+class Server;
+
+#define	I_MOD 1
+#define	T_MOD 2
+#define	K_MOD 3
+#define	O_MOD 4
+#define	L_MOD 5
+
+struct ModChange 
+{
+    char mode;
+    bool add; // true = +, false = -
+    std::vector<std::string> argument; // argument associé si besoin
+};
 
 class Channel
 {
@@ -34,6 +48,8 @@ class Channel
 		std::string				_password;
 		// Client					*_client_owner;
 		size_t					_nb_max_user;
+		bool					_invite_only;
+		bool					_topic_restriction;
 
 	public :
 		Channel(std::string channel_name, std::string topic, Client *client);
@@ -49,10 +65,18 @@ class Channel
 		int			Try_Invite(Client *client, Client *new_client);
 		int			Is_Operator(Client *client);
 
+		//MOD
+		void INVITE_Only(bool add);
+		void TOPIC_Restriction(bool add);
+		void CHANGE_Pass(bool add, std::vector<std::string> argument);
+		void CHANGE_Operator(Client *client, Server *serv, bool add, std::vector<std::string> argument);
+		void USER_Limit(bool add, std::vector<std::string> argument);
+
 		//GETTER
 		std::string	GET_Topic(){return _topic;}
 		std::string	GET_Name(){return _name;}
 		std::string GET_Mode_List();
+
 		
 		void		SET_Topic(std::string new_topic){_topic = new_topic;}
 };

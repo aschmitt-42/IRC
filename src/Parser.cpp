@@ -50,7 +50,7 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 {
 	std::cout << "\n\n--------IRC_PARSER--------" << std::endl;
 	std::cout << msg << std::endl;
-	std::cout << "--------------------------" << std::endl;
+	std::cout << "--------------------------\n" << std::endl;
 
 	std::string cmd = CMD_Finder(msg);
 	if (cmd.empty() && client->_registred_user)

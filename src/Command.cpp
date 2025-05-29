@@ -323,12 +323,50 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
 
 }
 
+//faire en sorte que le parser remplissent les argument de modchange un par un pour gerer les cas ou ils y auraient plusieurs arg pour un mod
+std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argument) 
+{
+    std::vector<ModChange> result;
+
+    std::string modeString = argument[1];
+    std::vector<std::string> arguments(argument.begin() + 2, argument.end());
+
+    size_t argIndex = 0;
+    bool adding = true; // '+' ou '-'
+    char c;
+
+    for (size_t i = 0; i < argument[i].size(); ++i) 
+    {
+        c = argument[1][i];
+        if (c == '+') 
+            adding = true;
+        else if (c == '-')
+            adding = false;
+        else 
+        {
+            ModChange modeChange;
+            modeChange.mode = c;
+            modeChange.add = adding;
+            modeChange.argument[0] = "";
+
+            if (c == 'k' || c == 'o' || (c == 'l' && adding)) 
+            {
+                if (argIndex >= arguments.size()) 
+                    ERR(client, 461, "MODE", "Not enough parameters");
+                modeChange.argument[0] = arguments[argIndex++];
+            }
+            result.push_back(modeChange);
+        }
+    }
+    return result;
+}
+
 
 void Server::MODE(Client *client, std::vector<std::string> argument)
 {
     std::cout << "MODE DETECTED" << std::endl;
 
-    if (argument.size() < 1)
+    if (argument.size() < 2)
         return ERR(client, 461, "MODE", "Not enough parameters");
 
     std::string channel_name = argument[0];
@@ -353,68 +391,47 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
         return;
     }
 
-    std::string mode = argument[1];
-    
-    if (mode == "+i")
+    std::vector<ModChange> result = MODE_Parser(client, argument);
+    for (size_t i = 0; i < result.size(); ++i)
     {
-        // channel->SET_Owner(client);
-        channel->SET_Topic("secret");
+        if (result[i].mode == 'i')
+            channel->INVITE_Only(result[i].add);
+        else if (result[i].mode == 't')
+            channel->TOPIC_Restriction(result[i].add);
+        else if (result[i].mode == 'k')
+            channel->CHANGE_Pass(result[i].add, result[i].argument);
+        else if (result[i].mode == 'o')
+            channel->CHANGE_Operator(client, this, result[i].add, result[i].argument);
+        else if (result[i].mode == 'l')
+            channel->USER_Limit(result[i].add, result[i].argument);
     }
-    else if (mode == "-i")
-    {
-        // channel->SET_Owner(NULL);
-        channel->SET_Topic("");
-    }
-    else if (mode == "+k")
-    {
-        if (argument.size() < 3)
-            return ERR(client, 461, "MODE", "Not enough parameters");
-        // channel->SET_Password(argument[2]);
-    }
-    else if (mode == "-k")
-    {
-        // channel->SET_Password("");
-    }
-    else if (mode == "+l")
-    {
-        if (argument.size() < 3)
-            return ERR(client, 461, "MODE", "Not enough parameters");
-        // channel->SET_Max_User(std::atoi(argument[2].c_str()));
-    }
-    else if (mode == "-l")
-    {
-        // channel->SET_Max_User(0);
-    }
-    else if (mode == "+t")
-    {
-        // channel->SET_Topic("secret");
-    }
-    else if (mode == "-t")
-    {
-        // channel->SET_Topic("");
-    }
-    else if (mode == "+o")
-    {
-        if (argument.size() < 3)
-            return ERR(client, 461, "MODE", "Not enough parameters");
-        Client *target_client = this->FINDING_Client_str(argument[2]);
-        if (!target_client)
-            return ERR(client, 401, argument[2], "No such nick/channel");
-        channel->Try_Invite(client, target_client);
-    }
-    else if (mode == "-o")
-    {
-        if (argument.size() < 3)
-            return ERR(client, 461, "MODE", "Not enough parameters");
-        Client *target_client = this->FINDING_Client_str(argument[2]);
-        if (!target_client)
-            return ERR(client, 401, argument[2], "No such nick/channel");
-        channel->Try_Invite(client, target_client);
-    }
-    else
-        return ERR(client, 472, mode, "is unknown mode char to me for /channel");
+    // else if (mode == "+k")
+    // {
+    //     if (argument.size() < 3)
+    //         return ERR(client, 461, "MODE", "Not enough parameters");
+
+    //     if (argument.size() < 3)
+    //         return ERR(client, 461, "MODE", "Not enough parameters");
+    //     Client *target_client = this->FINDING_Client_str(argument[2]);
+    //     if (!target_client)
+    //         return ERR(client, 401, argument[2], "No such nick/channel");
+    //     channel->Try_Invite(client, target_client);
+    // }
+    // else if (mode == "-o")
+    // {
+    //     if (argument.size() < 3)
+    //         return ERR(client, 461, "MODE", "Not enough parameters");
+    //     Client *target_client = this->FINDING_Client_str(argument[2]);
+    //     if (!target_client)
+    //         return ERR(client, 401, argument[2], "No such nick/channel");
+    //     channel->Try_Invite(client, target_client);
+    // }
+    // else
+    //     return ERR(client, 472, mode, "is unknown mode char to me for /channel");
 
 }
+
+
 
 // void Server::KICK(Client *client, std::vector<std::string> argument)
 // {
