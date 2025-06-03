@@ -25,7 +25,7 @@ int	Channel::Add_User(Client *client)
 	return 0;
 }
 
-void	Channel::New_User_msg(std::string msg)
+void	Channel::Send_Msg_To_All_Client(std::string msg)
 {
 	for (size_t i = 0; i < _client.size(); i++)
 	{
