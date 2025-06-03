@@ -164,6 +164,7 @@ void Channel::TOPIC_Restriction(bool add)
 
 void Channel::CHANGE_Pass(bool add, std::vector<std::string> argument)
 {
+
 	if (add)//faut il verifier quil y ait un mdp ou meme un mot de passe vide fonctionne
 		_password = argument[0];
 	else
@@ -172,6 +173,8 @@ void Channel::CHANGE_Pass(bool add, std::vector<std::string> argument)
 
 void Channel::CHANGE_Operator(Client *client, Server *serv, bool add, std::vector<std::string> argument)
 {
+	if (!Is_Operator(client))
+		return ERR(client, 482, _name, "You're not channel operator");
 	Client *target_client = serv->FINDING_Client_str(argument[0]);
     if (!target_client)
         return ERR(client, 401, argument[2], "No such nick/channel");

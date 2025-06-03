@@ -255,30 +255,48 @@ void Server::PING(Client *client, std::vector<std::string> argument)
     client->Send_message(msg);
 }
 
-void Server::PRIVMSG(Client *client, std::vector<std::string> argument)
+void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::string prv_msg)
 {
+    if (argument.size() < 2)
+         return ERR(client, 461, "PRIVMSG", "Not enough parameters");
+
     std::string msg;
+    std::string destination = argument[0];
+    size_t first_space = prv_msg.find(' ');
+    if (first_space != std::string::npos) 
+    {
+        size_t second_space = prv_msg.find(' ', first_space + 1);
+        if (second_space != std::string::npos)
+        {
+            prv_msg = prv_msg.substr(second_space + 1);
+        } 
+        else 
+        {
+            prv_msg.clear();
+        }
+    } 
+    else 
+    {
+        prv_msg.clear();
+    }
     
-    // if (argument.size() < 2)
-    //     return ERR(client, 461, "PRIVMSG", "Not enough parameters");
-    
-    if (argument[0][0] == '#') // ou autre caractere accepter de debut de channel
+    if (destination[0] == '#') // ou autre caractere accepter de debut de channel
     {
         std::cout << "PRIVMSG TO CHANNEL "<< std::endl;
-        Channel *channel = CHANNEL_Exist(argument[0]);
+        Channel *channel = CHANNEL_Exist(destination);
         if (!channel)
-        return ERR(client, 403, argument[0], "No such channel");
+            return ERR(client, 403, destination, "No such channel");
         msg = ":" + client->get_nick() + "!" + client->get_username() + "@" + "localhost";
-        msg += " PRIVMSG " + argument[0] + " " + argument[1];
+        msg += " PRIVMSG " + destination + " " + prv_msg;
         channel->SEND_Msg(msg, client);
     }
     else
     {
         std::cout << "PRIVMSG DIRECT TO ANOTHER CLIENT "<< std::endl;
-        Client *target_client = FINDING_Client_str(argument[0]);
+        Client *target_client = FINDING_Client_str(destination);
         if (!target_client)
-        return ERR(client, 401, argument[0], "No such nick/channel");
-        msg = ":" + client->get_Prefix() + " PRIVMSG " + target_client->get_nick() + " :" + argument[1];
+        return ERR(client, 401, destination, "No such nick/channel");
+        msg = ":" + client->get_Prefix() + " PRIVMSG " + target_client->get_nick() + " :" + prv_msg;
         client->Send_message(msg);
     }
 }
@@ -329,9 +347,7 @@ std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argu
     std::vector<ModChange> result;
 
     std::string modeString = argument[1];
-    std::vector<std::string> arguments(argument.begin() + 2, argument.end());
-
-    size_t argIndex = 0;
+    size_t argIndex = 2;
     bool adding = true; // '+' ou '-'
     char c;
 
@@ -351,9 +367,9 @@ std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argu
 
             if (c == 'k' || c == 'o' || (c == 'l' && adding)) 
             {
-                if (argIndex >= arguments.size()) 
+                if (argIndex >= argument.size() - 2) 
                     ERR(client, 461, "MODE", "Not enough parameters");
-                modeChange.argument[0] = arguments[argIndex++];
+                modeChange.argument[0] = argument[argIndex++];
             }
             result.push_back(modeChange);
         }
@@ -391,20 +407,20 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
         return;
     }
 
-    std::vector<ModChange> result = MODE_Parser(client, argument);
-    for (size_t i = 0; i < result.size(); ++i)
-    {
-        if (result[i].mode == 'i')
-            channel->INVITE_Only(result[i].add);
-        else if (result[i].mode == 't')
-            channel->TOPIC_Restriction(result[i].add);
-        else if (result[i].mode == 'k')
-            channel->CHANGE_Pass(result[i].add, result[i].argument);
-        else if (result[i].mode == 'o')
-            channel->CHANGE_Operator(client, this, result[i].add, result[i].argument);
-        else if (result[i].mode == 'l')
-            channel->USER_Limit(result[i].add, result[i].argument);
-    }
+    // std::vector<ModChange> result = MODE_Parser(client, argument);
+    // for (size_t i = 0; i < result.size(); ++i)
+    // {
+    //     if (result[i].mode == 'i')
+    //         channel->INVITE_Only(result[i].add);
+    //     else if (result[i].mode == 't')
+    //         channel->TOPIC_Restriction(result[i].add);
+    //     else if (result[i].mode == 'k')
+    //         channel->CHANGE_Pass(result[i].add, result[i].argument);
+    //     else if (result[i].mode == 'o')
+    //         channel->CHANGE_Operator(client, this, result[i].add, result[i].argument);
+    //     else if (result[i].mode == 'l')
+    //         channel->USER_Limit(result[i].add, result[i].argument);
+    // }
     // else if (mode == "+k")
     // {
     //     if (argument.size() < 3)

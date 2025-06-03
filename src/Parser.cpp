@@ -88,7 +88,7 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 	if (cmd == "JOIN")
 		serv->JOIN(client, argument);
 	else if (cmd == "PRIVMSG")
-		return serv->PRIVMSG(client, argument);
+		return serv->PRIVMSG(client, argument, msg);
 	else if (cmd == "INVITE")
 		serv->INVITE(client, argument);
 	else if (cmd == "MODE")
