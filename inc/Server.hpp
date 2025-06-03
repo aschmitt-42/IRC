@@ -66,7 +66,7 @@ class Server
 		void INVITE(Client *client, std::vector<std::string> argument);
 		void TOPIC(Client *client, std::vector<std::string> argument);
 		void MODE(Client *client, std::vector<std::string> argument);
-		void PRIVMSG(Client *client, std::vector<std::string> argument);
+		void PRIVMSG(Client *client, std::vector<std::string> argument, std::string prv_msg);
 
 		void MessageRegister(Client *client);
 

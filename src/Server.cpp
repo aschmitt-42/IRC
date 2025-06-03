@@ -92,7 +92,8 @@ void Server::read_data_from_socket(Client *client)
     std::string& msg = client->get_message();
     msg.append(buffer);
     
-    while (!msg.empty()) {
+    while (!msg.empty()) 
+    {
         size_t position = msg.find('\n');
     
         if (position == std::string::npos) {
