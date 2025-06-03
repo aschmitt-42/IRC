@@ -4,12 +4,12 @@
     - [x] verifier si le client est deja dans le channel
     - [x] plusieur channel
     - [x] verifier syntax du nom
-    - [ ] Invitation a faire
+    - [X] Invitation a faire
     - [ ] PAS A FAIRE argument spécial ("0") --> Demande de quitter tout les cannaux dont l'utilisateur est actuellement membre
 
 [ ] Finir PRIVMSG
     - [ ] test pour envoie a un client seul
-    - [ ] message avec des epaces n'envoie que le 1er mot
+    - [X] message avec des epaces n'envoie que le 1er mot
     - [ ] 
 
 
@@ -17,7 +17,10 @@
     - [ ] Mode avec que le nom du channel Envoyer tout les modes
     - [ ] implementer tout l'ajout et la supression des modes
 
-
+[ ] TOPIC 
+    - [ ] recupere le topic en entier 
+    - [ ] message de changement de topic
+     
 [ ] Msg de hexchat
     - [ ] CAP LS 302
 
@@ -46,6 +49,7 @@
     - [ ] Join channel ou pas invite            :localhost 473 <channel> :Cannot join channel (+i)
     - [ ] Join channel avec pas bon password    :localhost 475 <channel> :Cannot join channel (+b)
 
+
 --------IRC_PARSER--------
 MODE #test +l
 --------------------------
@@ -70,15 +74,6 @@ JOIN COMMMANDE :
         - Envoyer la liste des membres du canal (commande NAMES)
 
 
-#ifndef IRC_RESPONSE_HPP
-#define IRC_RESPONSE_HPP
-
-#include <iostream>
-#include <string>
-
-#include <cstdlib>
-#include <cstdio>
-#include <time.h>
 
 /* Error Responses */
 
@@ -120,25 +115,3 @@ JOIN COMMMANDE :
 #define RPL_QUIT(source, message)                       ":" + source + " QUIT :Quit: " + message
 #define RPL_KICK(source, channel, target, reason)       ":" + source + " KICK " + channel + " " + target + " :" + reason
 #define RPL_MODE(source, channel, modes, args)          ":" + source + " MODE " + channel + " " + modes + " " + args
-
-
-/* Log Response */
-
-static inline void log(const std::string& message) 
-{
-    time_t      rawtime;
-    struct tm   *timeinfo;
-    char        buffer[80];
-
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-
-    strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", timeinfo);
-    std::string str(buffer);
-
-    (void)message;
-    std::cout << "\033[0;34m[" << str << "]\033[0m ";
-    std::cout << message << std::endl;
-}
-
-#endif
