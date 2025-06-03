@@ -326,6 +326,8 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
 //faire en sorte que le parser remplissent les argument de modchange un par un pour gerer les cas ou ils y auraient plusieurs arg pour un mod
 std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argument) 
 {
+    std::cout << "MODE PARSER DETECTED" << std::endl;
+
     std::vector<ModChange> result;
 
     std::string modeString = argument[1];
@@ -366,32 +368,35 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
 {
     std::cout << "MODE DETECTED" << std::endl;
 
-    if (argument.size() < 2)
+    if (argument.size() < 1)
         return ERR(client, 461, "MODE", "Not enough parameters");
-
-    std::string channel_name = argument[0];
-    std::string msg;
     
-    Channel *channel = CHANNEL_Exist(channel_name); // CHECK CHANNEL EXIST
+    std::string msg;
+    std::string channel_name = argument[0];
+
+    Channel*    channel = CHANNEL_Exist(channel_name); // CHECK CHANNEL EXIST
     if (!channel)
         return ERR(client, 403, channel_name, "No such channel");
-    
+
     if (channel->Client_in_Channel(client->get_nick()) == 0) // CHECK IF CLIENT IS IN THE CHANNEL
         return ERR(client, 442, channel_name, "You're not on that channel");
+
+    if (argument.size() == 1) // MODE WITHOUT PARAMETER RETURN ALL THE MODE
+    {
+        std::cout << "MODE WITHOUT PARAMETER" << std::endl;
+        msg = ":localhost 324 " + client->get_nick() + " " + channel_name + " :";
+        msg += channel->GET_Mode_List();
+        client->Send_message(msg);
+        return;
+    }
     
     if (channel->Is_Operator(client) == 0) // CHECK IF CLIENT IS OPERATOR
         return ERR(client, 482, channel_name, "You're not channel operator");
     
-    if (argument.size() == 1) // MODE WITHOUT PARAMETER RETURN ALL THE MODE
-    {
-        msg = ":localhost 324 " + client->get_nick() + " " + channel_name;
-        msg += "+ i";
-        // msg += channel->GET_Mode_List();
-        client->Send_message(msg);
-        return;
-    }
-
     std::vector<ModChange> result = MODE_Parser(client, argument);
+
+    std::cout << "END OF MODE PARSER"<< std::endl;
+
     for (size_t i = 0; i < result.size(); ++i)
     {
         if (result[i].mode == 'i')

@@ -130,7 +130,8 @@ int	Channel::Is_Operator(Client *client)
 
 std::string Channel::GET_Mode_List()
 {
-	std::string mode_list;
+	std::string mode_list = "";
+
 	if (_invite_only)
 		mode_list += "i";
 	if (_topic_restriction)
@@ -139,6 +140,12 @@ std::string Channel::GET_Mode_List()
 		mode_list += "k";
 	if (_nb_max_user > 0)
 		mode_list += "l";
+
+	if (_password != "")
+		mode_list += " " + _password;
+	if (_nb_max_user > 0)
+		mode_list += " " + intToString(_nb_max_user);
+
 	return mode_list;
 }
 
