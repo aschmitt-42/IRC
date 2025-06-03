@@ -25,7 +25,7 @@ int	Channel::Add_User(Client *client)
 	return 0;
 }
 
-void	Channel::New_User_msg(std::string msg)
+void	Channel::Send_Msg_To_All_Client(std::string msg)
 {
 	for (size_t i = 0; i < _client.size(); i++)
 	{
@@ -130,7 +130,8 @@ int	Channel::Is_Operator(Client *client)
 
 std::string Channel::GET_Mode_List()
 {
-	std::string mode_list;
+	std::string mode_list = "";
+
 	if (_invite_only)
 		mode_list += "i";
 	if (_topic_restriction)
@@ -139,6 +140,12 @@ std::string Channel::GET_Mode_List()
 		mode_list += "k";
 	if (_nb_max_user > 0)
 		mode_list += "l";
+
+	if (_password != "")
+		mode_list += " " + _password;
+	if (_nb_max_user > 0)
+		mode_list += " " + intToString(_nb_max_user);
+
 	return mode_list;
 }
 

@@ -188,7 +188,7 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
         /// JOIN MSG 
         client->Join_Channel(channel);
         msg = ":" + client->get_Prefix() + " JOIN :" + channel_name;
-        channel->New_User_msg(msg);
+        channel->Send_Msg_To_All_Client(msg);
 
 
         // SEND TOPIC 331 : NO TOPIC || 332 : TOPIC
@@ -344,6 +344,8 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
 //faire en sorte que le parser remplissent les argument de modchange un par un pour gerer les cas ou ils y auraient plusieurs arg pour un mod
 std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argument) 
 {
+    std::cout << "MODE PARSER DETECTED" << std::endl;
+
     std::vector<ModChange> result;
 
     std::string modeString = argument[1];
@@ -382,45 +384,50 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
 {
     std::cout << "MODE DETECTED" << std::endl;
 
-    if (argument.size() < 2)
+    if (argument.size() < 1)
         return ERR(client, 461, "MODE", "Not enough parameters");
-
-    std::string channel_name = argument[0];
-    std::string msg;
     
-    Channel *channel = CHANNEL_Exist(channel_name); // CHECK CHANNEL EXIST
+    std::string msg;
+    std::string channel_name = argument[0];
+
+    Channel*    channel = CHANNEL_Exist(channel_name); // CHECK CHANNEL EXIST
     if (!channel)
         return ERR(client, 403, channel_name, "No such channel");
-    
+
     if (channel->Client_in_Channel(client->get_nick()) == 0) // CHECK IF CLIENT IS IN THE CHANNEL
         return ERR(client, 442, channel_name, "You're not on that channel");
+
+    if (argument.size() == 1)
+    {
+        std::cout << "MODE WITHOUT PARAMETER" << std::endl;
+
+        msg = ":localhost 324 " + client->get_nick() + " " + channel_name + " :";
+        msg += channel->GET_Mode_List();
+        client->Send_message(msg);
+        return;
+    }
     
     if (channel->Is_Operator(client) == 0) // CHECK IF CLIENT IS OPERATOR
         return ERR(client, 482, channel_name, "You're not channel operator");
     
-    if (argument.size() == 1) // MODE WITHOUT PARAMETER RETURN ALL THE MODE
+    std::vector<ModChange> result = MODE_Parser(client, argument);
+
+    std::cout << "END OF MODE PARSER"<< std::endl;
+
+    for (size_t i = 0; i < result.size(); ++i)
     {
-        msg = ":localhost 324 " + client->get_nick() + " " + channel_name;
-        msg += "+ i";
-        // msg += channel->GET_Mode_List();
-        client->Send_message(msg);
-        return;
+        if (result[i].mode == 'i')
+            channel->INVITE_Only(result[i].add);
+        else if (result[i].mode == 't')
+            channel->TOPIC_Restriction(result[i].add);
+        else if (result[i].mode == 'k')
+            channel->CHANGE_Pass(result[i].add, result[i].argument);
+        else if (result[i].mode == 'o')
+            channel->CHANGE_Operator(client, this, result[i].add, result[i].argument);
+        else if (result[i].mode == 'l')
+            channel->USER_Limit(result[i].add, result[i].argument);
     }
 
-    // std::vector<ModChange> result = MODE_Parser(client, argument);
-    // for (size_t i = 0; i < result.size(); ++i)
-    // {
-    //     if (result[i].mode == 'i')
-    //         channel->INVITE_Only(result[i].add);
-    //     else if (result[i].mode == 't')
-    //         channel->TOPIC_Restriction(result[i].add);
-    //     else if (result[i].mode == 'k')
-    //         channel->CHANGE_Pass(result[i].add, result[i].argument);
-    //     else if (result[i].mode == 'o')
-    //         channel->CHANGE_Operator(client, this, result[i].add, result[i].argument);
-    //     else if (result[i].mode == 'l')
-    //         channel->USER_Limit(result[i].add, result[i].argument);
-    // }
     // else if (mode == "+k")
     // {
     //     if (argument.size() < 3)
@@ -481,32 +488,39 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
 // }
 
 
-// void Server::TOPIC(Client *client, std::vector<std::string> argument)
-// {
-//     std::cout << "TOPIC DETECTED" << std::endl;;
-//     std::string msg;
-//     int status;
-//     if (client->get_channel() && argument.empty())
-//     {
-//         msg = client->get_channel()->GET_Topic();
-//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-//     }
-//     else if (argument.empty())
-//     {
-//         msg = "No channel joined yet\n";
-//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-//     }
-//     else if  (!client->is_operator())
-//     {
-//         msg = "You are not habilited to change the topic of this channe\n";
-//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-//     }
-//     else
-//     {
-//         client->get_channel()->SET_Topic(argument[0]);
-//         msg = "Topic successfully changed !\n";
-//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-//     }
-//     (void)status;
-//     (void)argument;
-// }
+void Server::TOPIC(Client *client, std::vector<std::string> argument)
+{
+    std::cout << "TOPIC DETECTED" << std::endl;
+
+    if (argument.size() < 1)
+        return ERR(client, 461, "TOPIC", "Not enough parameters");
+
+    std::string msg;
+    std::string channel_name = argument[0];
+    Channel *channel = CHANNEL_Exist(channel_name);
+    if (!channel)
+        return ERR(client, 403, channel_name, "No such channel");
+
+    if (channel->Client_in_Channel(client->get_nick()) == 0) // CHECK IF CLIENT IS IN THE CHANNEL
+        return ERR(client, 442, channel_name, "You're not on that channel");
+
+    if (argument.size() == 1) // GET TOPIC
+    {
+        std::string topic = channel->GET_Topic();
+        if (topic.empty())
+            msg = ":localhost 331 " + client->get_nick() + " " + channel_name + " :No topic is set";
+        else
+            msg = ":localhost 332 " + client->get_nick() + " " + channel_name + " :" + topic;
+        
+        client->Send_message(msg);
+        return;
+    }
+
+    if (channel->Is_Operator(client) == 0 && channel->Is_Topic_Restriction()) // CHECK IF CLIENT IS OPERATOR
+        return ERR(client, 482, channel_name, "You're not channel operator");
+
+    channel->SET_Topic(argument[1]); // SET TOPIC mais seulement avec le 1er elements et non toute la phrase
+
+    msg = client->get_Prefix() + " TOPIC " + channel_name + " :" + channel->GET_Topic(); // pas sur du msg, client ne recois rien comme quoi topic a ete change
+    channel->Send_Msg_To_All_Client(msg);
+}

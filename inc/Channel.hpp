@@ -57,7 +57,7 @@ class Channel
 		std::string	ClientList();
 		void		SEND_Msg(std::string msg, Client *client);
 		void		DELETE_User(Client *client);
-		void		New_User_msg(std::string msg);
+		void		Send_Msg_To_All_Client(std::string msg);
 		int			Add_User(Client *client);
 		int			Try_Join(Client *client, std::string key);
 		int			Client_in_Channel(std::string client_name);
@@ -75,6 +75,9 @@ class Channel
 		std::string	GET_Topic(){return _topic;}
 		std::string	GET_Name(){return _name;}
 		std::string GET_Mode_List();
+		
+		bool	Is_Topic_Restriction(){return _topic_restriction;}
+		bool	Is_Invite_Only(){return _invite_only;}
 
 		
 		void		SET_Topic(std::string new_topic){_topic = new_topic;}
