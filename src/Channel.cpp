@@ -7,7 +7,7 @@ Channel::Channel(std::string channel_name, std::string topic_name, Client *clien
 	_name = channel_name;
 	_topic = topic_name;
 	_password = "";
-	_nb_max_user = -1;
+	_nb_max_user = 0;
 	_operator.push_back(client);
 }
 Channel::~Channel(){}
@@ -73,23 +73,26 @@ std::string	Channel::ClientList() // rajouter @ pour operateur
 
 int Channel::Try_Join(Client *client, std::string key)
 {
-	for (std::vector<char>::iterator it = _mode.begin(); it != _mode.end(); ++it)
+	if (_nb_max_user != 0 && _client.size() >= _nb_max_user)
 	{
-		if (*it == 'l' && _client.size() >= _nb_max_user)
+		ERR(client, 471, _name, "Cannot join channel (+l)");
+		return 1;
+	}
+	if (_invite_only)
+	{
+		for (std::vector<Client*>::iterator it = _invite.begin(); it != _invite.end(); ++it) 
 		{
-			ERR(client, 471, _name, "Cannot join channel (+l)");
-			return 1;
+			if ((*it)->get_nick() == client->get_nick()) //client dans la liste d'invitation
+				return 0;
 		}
-		if (*it == 'i' && 1 == 1) // && pas invite alors err
-		{
-			ERR(client, 473, _name, "Cannot join channel (+i)");
-			return 1;
-		}
-		if (*it == 'k' && key != _password)
-		{
-			ERR(client, 475, _name, "Cannot join channel (+k)");
-			return 1;
-		}
+		// fin de boucle client n'y est pas erreur pour rejoindre
+		ERR(client, 473, _name, "Cannot join channel (+i)");
+		return 1;
+	}
+	if (_password != "" && key != _password) // mode 'password' et mauvais mot de passe alors erreur pour rejoindre
+	{
+		ERR(client, 475, _name, "Cannot join channel (+k)");
+		return 1;
 	}
 	return 0;
 }
@@ -106,16 +109,7 @@ int	Channel::Client_in_Channel(std::string client_name)
 
 int	Channel::Try_Invite(Client *client, Client *new_client)
 {
-	int i = 0;
-	for (std::vector<char>::iterator it = _mode.begin(); it != _mode.end(); ++it)
-	{
-		if (*it == 'i'){
-			i = 1;
-			break;
-		}
-	}
-
-	if (i && !this->Is_Operator(client)) // mode 'invite_only' et client pas operateur alors erreur pour inviter quelqu'un
+	if (_invite_only && !this->Is_Operator(client)) // mode 'invite_only' et client pas operateur alors erreur pour inviter quelqu'un
 		return 1;
 	
 	// PAS DE PROBLEME POUR INVITER
@@ -137,11 +131,14 @@ int	Channel::Is_Operator(Client *client)
 std::string Channel::GET_Mode_List()
 {
 	std::string mode_list;
-	for (size_t i = 0; i < _mode.size(); i++)
-	{
-		mode_list += _mode[i];
-	}
-	
+	if (_invite_only)
+		mode_list += "i";
+	if (_topic_restriction)
+		mode_list += "t";
+	if (_password != "")
+		mode_list += "k";
+	if (_nb_max_user > 0)
+		mode_list += "l";
 	return mode_list;
 }
 

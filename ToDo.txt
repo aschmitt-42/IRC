@@ -46,6 +46,13 @@
     - [ ] Join channel ou pas invite            :localhost 473 <channel> :Cannot join channel (+i)
     - [ ] Join channel avec pas bon password    :localhost 475 <channel> :Cannot join channel (+b)
 
+--------IRC_PARSER--------
+MODE #test +l
+--------------------------
+
+MODE DETECTED
+[1]    16120 segmentation fault (core dumped)  ./ircserv 4444 JEAN
+
 
 
 

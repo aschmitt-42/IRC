@@ -39,7 +39,6 @@ struct ModChange
 class Channel
 {
 	private :
-		std::vector<char>		_mode;
 		std::vector<Client*>	_client;
 		std::vector<Client*>	_invite;
 		std::vector<Client*>	_operator;
