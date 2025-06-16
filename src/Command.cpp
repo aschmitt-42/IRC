@@ -341,6 +341,19 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
 
 }
 
+void    printmod(std::vector<ModChange> result)
+{
+    for (size_t i = 0; i < result.size(); ++i)
+    {
+        std::cout << "================== Mod" << i << " ==================" << std::endl;
+        std::cout << "mod : " << result[i].mode << std::endl << "add : " << result[i].add <<  std::endl;
+        std::cout << "Arguments :" << std::endl;
+        for (size_t j = 0; j < result[i].argument.size(); ++j)
+            std::cout << result[i].argument[j] << " | ";
+    }
+    std::cout << std::endl;
+}
+
 //faire en sorte que le parser remplissent les argument de modchange un par un pour gerer les cas ou ils y auraient plusieurs arg pour un mod
 std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argument) 
 {
@@ -353,9 +366,9 @@ std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argu
     bool adding = true; // '+' ou '-'
     char c;
 
-    for (size_t i = 0; i < argument[i].size(); ++i) 
+    for (size_t i = 0; i < modeString.size(); ++i) 
     {
-        c = argument[1][i];
+        c = modeString[i];
         if (c == '+') 
             adding = true;
         else if (c == '-')
@@ -376,6 +389,7 @@ std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argu
             result.push_back(modeChange);
         }
     }
+    //printmod(result);
     return result;
 }
 
