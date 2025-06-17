@@ -24,14 +24,13 @@ void Server::PASS(Client *client, std::vector<std::string> argument)
     if (argument[0] != _password)
         return ERR(client, 464, "","Password incorrect");
 
-    // client->Send_message("Password valid, welcome");
-
     if (client->_registred_user && client->_registred_password == 0 && !client->get_nick().empty())
         MessageRegister(client);
             
     client->_registred_password = 1;
     
 }
+
 
 void Server::NICK(Client *client, std::vector<std::string>argument)
 {
@@ -43,15 +42,16 @@ void Server::NICK(Client *client, std::vector<std::string>argument)
     if (NICK_Already_Exist(argument[0]))
         return ERR(client, 433, argument[0], "Nickname is already in use");
 
-    // verifier si le nickname est bon (pas de caractere interdit)
-    // ERR_ERRONEUSNICKNAME : "432 <nick> :Erroneous nickname\r\n"
-
+    if (isValidNick(argument[0]) == false)
+        return ERR(client, 432, argument[0], "Erroneous nickname");
     
-    // if (client->get_nick() != "") --> a deja un nick donc le change
-    //      envoyer message comme quoi il a changer de nick a tout les client register
-
+    if (client->get_nick() != "") // Change nick and message all clients
+    {
+        std::string msg = ":" + client->get_Prefix() + " NICK :" + argument[0];
+        for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it) 
+            (*it)->Send_message(msg);
+    }
     
-
     if (client->_registred_user && client->_registred_password && client->get_nick().empty())
     {
         client->SET_Nick(argument[0]);
@@ -59,9 +59,6 @@ void Server::NICK(Client *client, std::vector<std::string>argument)
     }
     else
         client->SET_Nick(argument[0]);
-
-    // PAS SUR client->Send_message("Nick valid, welcome " + argument[0]);
-
 }
 
 void Server::USER(Client *client, std::vector<std::string>argument)
@@ -283,8 +280,11 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
     if (argument.size() < 2)
         return ERR(client, 461, "PRIVMSG", "Not enough parameters");
 
+
     std::string msg;
     std::string destination = argument[0];
+    
+    // ENLEVE LE PREFIX
     size_t first_space = prv_msg.find(' ');
     if (first_space != std::string::npos) 
     {
@@ -302,7 +302,7 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
     {
         prv_msg.clear();
     }
-    
+
     if (destination[0] == '#') // ou autre caractere accepter de debut de channel
     {
         std::cout << "PRIVMSG TO CHANNEL "<< std::endl;
@@ -318,9 +318,9 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
         std::cout << "PRIVMSG DIRECT TO ANOTHER CLIENT "<< std::endl;
         Client *target_client = FINDING_Client_str(destination);
         if (!target_client)
-        return ERR(client, 401, destination, "No such nick/channel");
+            return ERR(client, 401, destination, "No such nick/channel");
         msg = ":" + client->get_Prefix() + " PRIVMSG " + target_client->get_nick() + " :" + prv_msg;
-        client->Send_message(msg);
+        target_client->Send_message(msg);
     }
 }
 

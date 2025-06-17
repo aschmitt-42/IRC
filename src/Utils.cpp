@@ -50,7 +50,6 @@ void	ERR(Client *client, int err_id, std::string command, std::string msg)
     std::cout << "ERR DETECTED ID:"  << err_id << std::endl;
     
     std::string err_msg;
-    
 	if (!client)
         return;
     
@@ -60,4 +59,22 @@ void	ERR(Client *client, int err_id, std::string command, std::string msg)
         err_msg = ":localhost " + intToString(err_id) + " " + command + " :" + msg;
 
 	client->Send_message(err_msg);
+}
+
+bool isValidNick(const std::string& nick) 
+{
+    char c;
+
+    if (nick.empty() || nick.length() > 9) 
+        return false;
+    if (!isalpha(nick[0]))
+        return false;
+
+    for (size_t i = 1; i < nick.length(); i++) 
+    {
+        c = nick[i];
+        if (!isalnum(c) && c != '-' && c != '[' && c != ']' && c != '\\' && c != '`' && c != '^' && c != '{' && c != '}') 
+            return false;
+    }
+    return true;
 }

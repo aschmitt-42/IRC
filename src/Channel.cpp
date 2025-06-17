@@ -55,6 +55,7 @@ void	Channel::SEND_Msg_to_everyone(std::string add, Client *client)
 void	Channel::SEND_Msg(std::string msg, Client *client)
 {
 	// msg = "[" + client->get_username() + "]" + " : " + msg;
+	std::cout << "SEND_MSG TO CHANNEL " << msg << std::endl;
 
 	for (size_t	i = 0; i < _client.size(); ++i)
 	{
