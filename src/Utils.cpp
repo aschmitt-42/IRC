@@ -53,6 +53,11 @@ std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argu
             adding = false;
         else 
         {
+            if (c != 'i' && c != 'i' && c != 't' && c != 'k' && c != 'o' && c != 'l')
+            {
+                 result.clear();
+                 return (result);
+            }
             ModChange modeChange;
             modeChange.mode = c;
             modeChange.add = adding;
@@ -60,8 +65,13 @@ std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argu
             if (c == 'k' || c == 'o' || (c == 'l' && adding)) 
             {
                 if (argIndex >= argument.size() - 2) 
+                {
+                    result.clear();
                     ERR(client, 461, "MODE", "Not enough parameters");
-                modeChange.argument.push_back(argument[argIndex++]);
+                    return (result);
+                }
+                else
+                    modeChange.argument.push_back(argument[argIndex++]);
             }
             else
                 modeChange.argument.push_back("");

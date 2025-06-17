@@ -349,7 +349,8 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
 
     for (size_t i = 0; i < result.size(); ++i)
     {
-        std::cout << "1\n" << std::endl;
+        if (result.size() == 0)
+            break;
         if (result[i].mode == 'i')
             channel->INVITE_Only(result[i].add, client);
         else if (result[i].mode == 't')
@@ -360,8 +361,6 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
             channel->CHANGE_Operator(client, this, result[i].add, result[i].argument);
         else if (result[i].mode == 'l')
             channel->USER_Limit(result[i].add, result[i].argument);
-        else
-            (void)result;//ERREUR caractere nest pas un mod!!!
     }
 }
 
