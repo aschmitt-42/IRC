@@ -72,6 +72,7 @@ class Server
 
 		int 	NICK_Already_Exist(std::string nickname);
 		Channel	*CHANNEL_Exist(std::string channel_name);
+		void 	SEND_Quit_Msg(Client *client, std::string msg);
 };
 
 int create_server_socket(int port);

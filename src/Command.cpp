@@ -86,29 +86,18 @@ void Server::USER(Client *client, std::vector<std::string>argument)
 }
 
 
-
 void Server::QUIT(Client *client, std::string msg)
 {
     std::cout << "QUIT DETECTED" << std::endl;
     size_t first_space = msg.find(' ');
     if (first_space != std::string::npos) 
-    {
-        size_t second_space = msg.find(' ', first_space + 1);
-        if (second_space != std::string::npos)
-        {
-            msg = msg.substr(second_space + 1);
-        } 
-        else 
-        {
-            msg.clear();
-        }
-    } 
+        msg = msg.substr(first_space + 1);
     else 
     {
         msg.clear();
     }
+    SEND_Quit_Msg(client, msg);
     disconect_client(client);
-    //SEND_Quit_Msg(client, msg);
     for (size_t i = 0; i < _channels.size(); ++i)
         _channels[i]->DELETE_User(client);
 

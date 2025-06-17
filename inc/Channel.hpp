@@ -77,6 +77,7 @@ class Channel
 		std::string	GET_Topic(){return _topic;}
 		std::string	GET_Name(){return _name;}
 		std::string GET_Mode_List();
+		std::vector<Client*>	GET_Clients_Vector(){return _client;}
 		
 		bool	Is_Topic_Restriction(){return _topic_restriction;}
 		bool	Is_Invite_Only(){return _invite_only;}
