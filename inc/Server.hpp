@@ -79,6 +79,8 @@ void add_to_poll_fds(struct pollfd *poll_fds[], int new_fd, int *poll_count, int
 void IRC_Parser(std::string msg, Server *serv, Client *client);
 std::string intToString(int number);
 bool isValidNick(const std::string& nick);
+std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argument);
+std::vector<std::string> split(const std::string input, char delimiter);
 
 
 void	ERR(Client *client, int err_id, std::string command, std::string msg);

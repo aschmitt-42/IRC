@@ -1,15 +1,5 @@
 #include "Server.hpp"
 
-int Server::NICK_Already_Exist(std::string nickname)
-{
-    for (std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it) 
-    {
-        if ((*it)->get_nick() == nickname)
-            return 1;
-    }
-    return 0;
-}
-
 void Server::PASS(Client *client, std::vector<std::string> argument)
 {
     std::cout << "PASS DETECTED" << std::endl;
@@ -126,35 +116,6 @@ void Server::QUIT(Client *client, std::string msg)
     (void)msg;//envoyer le message aux client qui partage le meme channel
 }
 
-
-Channel *Server::CHANNEL_Exist(std::string channel_name)
-{
-    for (size_t i = 0; i < _channels.size(); ++i)
-    {
-        if (_channels[i]->GET_Name() == channel_name)
-            return _channels[i];
-    }
-    return NULL;
-}
-
-
-std::vector<std::string> split(const std::string input, char delimiter)
-{
-    std::vector<std::string> result;
-    std::stringstream ss(input);
-    std::string token;
-
-    while (std::getline(ss, token, delimiter)) 
-    {
-        // Supprimer les espaces éventuels autour du token
-        token.erase(std::remove(token.begin(), token.end(), ' '), token.end());
-        if (!token.empty()) {
-            result.push_back(token);
-        }
-    }
-
-    return result;
-}
 
 void Server::JOIN(Client *client, std::vector<std::string> argument)
 {
@@ -363,59 +324,6 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
     new_client->Send_message(msg);
 
 }
-
-void    printmod(std::vector<ModChange> result)
-{
-    for (size_t i = 0; i < result.size(); ++i)
-    {
-        std::cout << "================== Mod" << i << " ==================" << std::endl;
-        std::cout << "mod : " << result[i].mode << std::endl << "add : " << result[i].add <<  std::endl;
-        std::cout << "Arguments :" << std::endl;
-        for (size_t j = 0; j < result[i].argument.size(); ++j)
-            std::cout << result[i].argument[j] << " | ";
-    }
-    std::cout << "\n========================================\n" << std::endl;
-}
-
-//faire en sorte que le parser remplissent les argument de modchange un par un pour gerer les cas ou ils y auraient plusieurs arg pour un mod
-std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argument) 
-{
-    std::cout << "MODE PARSER DETECTED" << std::endl;
-
-    std::vector<ModChange> result;
-    std::string modeString = argument[1];
-    size_t argIndex = 2;
-    bool adding = true; // '+' ou '-'
-    char c;
-
-    for (size_t i = 0; i < modeString.size(); ++i) 
-    {
-        c = modeString[i];
-        if (c == '+') 
-            adding = true;
-        else if (c == '-')
-            adding = false;
-        else 
-        {
-            ModChange modeChange;
-            modeChange.mode = c;
-            modeChange.add = adding;
-
-            if (c == 'k' || c == 'o' || (c == 'l' && adding)) 
-            {
-                if (argIndex >= argument.size() - 2) 
-                    ERR(client, 461, "MODE", "Not enough parameters");
-                modeChange.argument.push_back(argument[argIndex++]);
-            }
-            else
-                modeChange.argument.push_back("");
-            result.push_back(modeChange);
-        }
-    }
-    printmod(result);
-    return result;
-}
-
 
 void Server::MODE(Client *client, std::vector<std::string> argument)
 {
