@@ -1,17 +1,5 @@
 #To Do List
 
-[ ] Finir commande JOIN
-    - [x] verifier si le client est deja dans le channel
-    - [x] plusieur channel
-    - [x] verifier syntax du nom
-    - [X] Invitation a faire
-    - [ ] PAS A FAIRE argument spécial ("0") --> Demande de quitter tout les cannaux dont l'utilisateur est actuellement membre
-
-[ ] Finir PRIVMSG
-    - [ ] test pour envoie a un client seul
-    - [X] message avec des epaces n'envoie que le 1er mot
-    - [ ] 
-
 
 [ ] MODE
     - [ ] Mode avec que le nom du channel Envoyer tout les modes
