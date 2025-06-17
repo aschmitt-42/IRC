@@ -39,12 +39,6 @@ std::vector<std::string> ARG_Finder(std::string msg)
 	return words;
 }
 
-// void PRINT_Msg(std::string msg, Server *serv, Client *client)
-// {
-// 	if (client->get_channel())
-// 		client->get_channel()->SEND_Msg(msg, client);
-// 	(void)serv;
-// }
 
 void IRC_Parser(std::string msg, Server *serv, Client *client)
 {

@@ -155,8 +155,13 @@ std::string Channel::GET_Mode_List()
 
 void Channel::INVITE_Only(bool add)
 {
+	std::string msg;
 	if (add)
+	{
+		if (!_invite_only)
+			Send_Msg_To_All_Client("");
 		_invite_only = true;
+	}
 	else 
 		_invite_only = false;
 }
@@ -184,7 +189,7 @@ void Channel::CHANGE_Operator(Client *client, Server *serv, bool add, std::vecto
 		return ERR(client, 482, _name, "You're not channel operator");
 	Client *target_client = serv->FINDING_Client_str(argument[0]);
     if (!target_client)
-        return ERR(client, 401, argument[2], "No such nick/channel");
+        return ERR(client, 401, argument[0], "No such nick/channel");
     for (size_t i = 0; i < _operator.size(); ++i)
 	{
 		if (target_client == _operator[i])
@@ -196,8 +201,8 @@ void Channel::CHANGE_Operator(Client *client, Server *serv, bool add, std::vecto
 
 void Channel::USER_Limit(bool add, std::vector<std::string> argument)
 {
-	if (add == false)
-		_nb_max_user = 0;
+	 if (add == false)
+	 	_nb_max_user = 0;
 	else
 	{
 		int nb_limit;

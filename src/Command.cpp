@@ -351,7 +351,7 @@ void    printmod(std::vector<ModChange> result)
         for (size_t j = 0; j < result[i].argument.size(); ++j)
             std::cout << result[i].argument[j] << " | ";
     }
-    std::cout << std::endl;
+    std::cout << "\n========================================\n" << std::endl;
 }
 
 //faire en sorte que le parser remplissent les argument de modchange un par un pour gerer les cas ou ils y auraient plusieurs arg pour un mod
@@ -360,7 +360,6 @@ std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argu
     std::cout << "MODE PARSER DETECTED" << std::endl;
 
     std::vector<ModChange> result;
-
     std::string modeString = argument[1];
     size_t argIndex = 2;
     bool adding = true; // '+' ou '-'
@@ -378,18 +377,19 @@ std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argu
             ModChange modeChange;
             modeChange.mode = c;
             modeChange.add = adding;
-            modeChange.argument[0] = "";
 
             if (c == 'k' || c == 'o' || (c == 'l' && adding)) 
             {
                 if (argIndex >= argument.size() - 2) 
                     ERR(client, 461, "MODE", "Not enough parameters");
-                modeChange.argument[0] = argument[argIndex++];
+                modeChange.argument.push_back(argument[argIndex++]);
             }
+            else
+                modeChange.argument.push_back("");
             result.push_back(modeChange);
         }
     }
-    //printmod(result);
+    printmod(result);
     return result;
 }
 
@@ -425,11 +425,11 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
         return ERR(client, 482, channel_name, "You're not channel operator");
     
     std::vector<ModChange> result = MODE_Parser(client, argument);
-
     std::cout << "END OF MODE PARSER"<< std::endl;
 
     for (size_t i = 0; i < result.size(); ++i)
     {
+        std::cout << "1\n" << std::endl;
         if (result[i].mode == 'i')
             channel->INVITE_Only(result[i].add);
         else if (result[i].mode == 't')
@@ -440,67 +440,10 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
             channel->CHANGE_Operator(client, this, result[i].add, result[i].argument);
         else if (result[i].mode == 'l')
             channel->USER_Limit(result[i].add, result[i].argument);
+        else
+            (void)result;//ERREUR caractere nest pas un mod!!!
     }
-
-    // else if (mode == "+k")
-    // {
-    //     if (argument.size() < 3)
-    //         return ERR(client, 461, "MODE", "Not enough parameters");
-
-    //     if (argument.size() < 3)
-    //         return ERR(client, 461, "MODE", "Not enough parameters");
-    //     Client *target_client = this->FINDING_Client_str(argument[2]);
-    //     if (!target_client)
-    //         return ERR(client, 401, argument[2], "No such nick/channel");
-    //     channel->Try_Invite(client, target_client);
-    // }
-    // else if (mode == "-o")
-    // {
-    //     if (argument.size() < 3)
-    //         return ERR(client, 461, "MODE", "Not enough parameters");
-    //     Client *target_client = this->FINDING_Client_str(argument[2]);
-    //     if (!target_client)
-    //         return ERR(client, 401, argument[2], "No such nick/channel");
-    //     channel->Try_Invite(client, target_client);
-    // }
-    // else
-    //     return ERR(client, 472, mode, "is unknown mode char to me for /channel");
-
 }
-
-
-
-// void Server::KICK(Client *client, std::vector<std::string> argument)
-// {
-//     std::cout << "KICK DETECTED ON " << argument[0] << std::endl;
-//     std::string msg;
-//     int status;
-
-//     if (!client->is_operator())
-//         return;
-//     Client *kicked_user = FINDING_Client_str(argument[0]);
-//     if (kicked_user && kicked_user->get_channel() == client->get_channel())
-//     {
-//         kicked_user->get_channel()->DELETE_User(kicked_user);
-//         msg = "Client " + kicked_user->get_username() + " has benn kicked of the " + client->get_channel()->GET_Name() + " channel\n";
-//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-//         msg = "You have been kickend from " + client->get_channel()->GET_Name() + " by " + client->get_username() + "\n";
-//         status = send(kicked_user->get_clientfd(), msg.c_str(), msg.size(), 0);
-//     }
-//     else if (kicked_user && kicked_user->get_channel() != client->get_channel()) 
-//     {
-//         msg = "Client " + kicked_user->get_username() + " is not in your channel " + client->get_channel()->GET_Name() + "\n";
-//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-//     }
-//     else
-//     {
-//         msg = "No client " + argument[0] + " found\n";
-//         status = send(client->get_clientfd(), msg.c_str(), msg.size(), 0);
-//     }
-//     (void)status;
-//     (void)kicked_user;
-// }
-
 
 void Server::TOPIC(Client *client, std::vector<std::string> argument)
 {
