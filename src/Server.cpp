@@ -26,13 +26,13 @@ Server::~Server()
 
 void Server::disconect_client(Client *client)
 {
+    std::cout << "Client " << client->get_nick() << " Quitted IRC, Farawell..." << std::endl;
     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
         if (it->fd == client->get_clientfd()) {
             _poll_fds.erase(it);
             break;
         }
     }
-
     for (std::size_t i = 0; i < _clients.size(); i++){
         if (_clients[i]->get_clientfd() == client->get_clientfd())
         {

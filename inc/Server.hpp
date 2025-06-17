@@ -60,7 +60,7 @@ class Server
 		void USER(Client *client, std::vector<std::string>argument);
 		void PING(Client *client, std::vector<std::string>argument);
 		void PONG(Client *client, std::vector<std::string>argument);
-		void QUIT(Client *client, std::vector<std::string>argument);
+		void QUIT(Client *client, std::string msg);
 		void JOIN(Client *user, std::vector<std::string> argument);
 		void KICK(Client *client, std::vector<std::string> argument);
 		void INVITE(Client *client, std::vector<std::string> argument);

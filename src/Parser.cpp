@@ -42,7 +42,7 @@ std::vector<std::string> ARG_Finder(std::string msg)
 
 void IRC_Parser(std::string msg, Server *serv, Client *client)
 {
-	std::cout << "\n\n--------IRC_PARSER--------" << std::endl;
+	std::cout << "\n=====================================================\n--------IRC_PARSER--------" << std::endl;
 	std::cout << msg << std::endl;
 	std::cout << "--------------------------\n" << std::endl;
 
@@ -65,7 +65,7 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 	else if (cmd == "USER")
 		return serv->USER(client, argument);
 	else if (cmd == "QUIT")
-		return serv->QUIT(client, argument);
+		return serv->QUIT(client, msg);
 	else if (cmd == "PING")
 		return serv->PING(client, argument);
 	

@@ -41,8 +41,10 @@
     - [ ] RPL_INVITING
     - [ ] RPL_AWAY
 
-    verifier si lutilisateur nexiste pas deja (pe deja fais)
-    
+KICK
+topic un seul message
+quit
+pofiner mods
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////                                                     TEST                                                                                   ///////

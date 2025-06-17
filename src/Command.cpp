@@ -98,12 +98,35 @@ void Server::USER(Client *client, std::vector<std::string>argument)
     client->_registred_user = 1;
 }
 
-void Server::QUIT(Client *client, std::vector<std::string>argument)
+
+
+void Server::QUIT(Client *client, std::string msg)
 {
     std::cout << "QUIT DETECTED" << std::endl;
+    size_t first_space = msg.find(' ');
+    if (first_space != std::string::npos) 
+    {
+        size_t second_space = msg.find(' ', first_space + 1);
+        if (second_space != std::string::npos)
+        {
+            msg = msg.substr(second_space + 1);
+        } 
+        else 
+        {
+            msg.clear();
+        }
+    } 
+    else 
+    {
+        msg.clear();
+    }
+    disconect_client(client);
+    //SEND_Quit_Msg(client, msg);
+    for (size_t i = 0; i < _channels.size(); ++i)
+        _channels[i]->DELETE_User(client);
 
     (void)client;
-    (void)argument;
+    (void)msg;//envoyer le message aux client qui partage le meme channel
 }
 
 
@@ -175,7 +198,7 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
     
         if (!channel)
         {
-            channel = new Channel(channel_name, "", client);
+            channel = new Channel(channel_name, "", client, this);
             // channel->SET_Owner(client);
             _channels.push_back(channel);
         }
@@ -258,7 +281,7 @@ void Server::PING(Client *client, std::vector<std::string> argument)
 void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::string prv_msg)
 {
     if (argument.size() < 2)
-         return ERR(client, 461, "PRIVMSG", "Not enough parameters");
+        return ERR(client, 461, "PRIVMSG", "Not enough parameters");
 
     std::string msg;
     std::string destination = argument[0];
@@ -431,7 +454,7 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
     {
         std::cout << "1\n" << std::endl;
         if (result[i].mode == 'i')
-            channel->INVITE_Only(result[i].add);
+            channel->INVITE_Only(result[i].add, client);
         else if (result[i].mode == 't')
             channel->TOPIC_Restriction(result[i].add);
         else if (result[i].mode == 'k')

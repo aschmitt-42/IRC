@@ -2,13 +2,16 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 
-Channel::Channel(std::string channel_name, std::string topic_name, Client *client)
+Channel::Channel(std::string channel_name, std::string topic_name, Client *client, Server *server)
 {
 	_name = channel_name;
 	_topic = topic_name;
+	_topic_restriction = false;
 	_password = "";
+	_invite_only = true;
 	_nb_max_user = 0;
 	_operator.push_back(client);
+	_server = server;
 }
 Channel::~Channel(){}
 
@@ -25,14 +28,6 @@ int	Channel::Add_User(Client *client)
 	return 0;
 }
 
-void	Channel::Send_Msg_To_All_Client(std::string msg)
-{
-	for (size_t i = 0; i < _client.size(); i++)
-	{
-		_client[i]->Send_message(msg);
-	}
-	
-}
 
 void	Channel::DELETE_User(Client *client)
 {
@@ -46,6 +41,17 @@ void	Channel::DELETE_User(Client *client)
 	}
 }
 
+void	Channel::SEND_Msg_to_everyone(std::string add, Client *client)
+{
+	std::string msg;
+	msg = ":" + client->get_nick() + "!" + client->get_username() + "@" + "localhost";
+    msg += " PRIVMSG " + _name + " " + add;
+	for (size_t	i = 0; i < _client.size(); ++i)
+	{
+		_client[i]->Send_message(msg);
+	}
+}
+
 void	Channel::SEND_Msg(std::string msg, Client *client)
 {
 	// msg = "[" + client->get_username() + "]" + " : " + msg;
@@ -55,6 +61,15 @@ void	Channel::SEND_Msg(std::string msg, Client *client)
 		if (_client[i]->get_nick() != client->get_nick())
 			_client[i]->Send_message(msg);
 	}
+}
+
+void	Channel::Send_Msg_To_All_Client(std::string msg)
+{
+	for (size_t i = 0; i < _client.size(); i++)
+	{
+		_client[i]->Send_message(msg);
+	}
+	
 }
 
 std::string	Channel::ClientList() // rajouter @ pour operateur
@@ -153,17 +168,28 @@ std::string Channel::GET_Mode_List()
 /////////////////    MOD     /////////////////
 
 
-void Channel::INVITE_Only(bool add)
+void Channel::INVITE_Only(bool add, Client *client)
 {
+	std::cout << _name << std::endl;
 	std::string msg;
 	if (add)
 	{
 		if (!_invite_only)
-			Send_Msg_To_All_Client("");
+		{
+			msg = client->get_nick() + " sets mode +i on " + _name;
+			SEND_Msg_to_everyone(msg, client);
+		}
 		_invite_only = true;
 	}
-	else 
+	else
+	{ 
+	if (_invite_only)
+		{
+			msg = client->get_nick() + " sets mode -i on " + _name;
+			SEND_Msg_to_everyone(msg, client);
+		}
 		_invite_only = false;
+	}
 }
 
 void Channel::TOPIC_Restriction(bool add)

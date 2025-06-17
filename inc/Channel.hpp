@@ -49,12 +49,14 @@ class Channel
 		size_t					_nb_max_user;
 		bool					_invite_only;
 		bool					_topic_restriction;
+		Server					*_server;
 
 	public :
-		Channel(std::string channel_name, std::string topic, Client *client);
+		Channel(std::string channel_name, std::string topic, Client *client, Server *server);
 		~Channel();
 
 		std::string	ClientList();
+		void		SEND_Msg_to_everyone(std::string msg, Client *client);
 		void		SEND_Msg(std::string msg, Client *client);
 		void		DELETE_User(Client *client);
 		void		Send_Msg_To_All_Client(std::string msg);
@@ -65,7 +67,7 @@ class Channel
 		int			Is_Operator(Client *client);
 
 		//MOD
-		void INVITE_Only(bool add);
+		void INVITE_Only(bool add, Client *client);
 		void TOPIC_Restriction(bool add);
 		void CHANGE_Pass(bool add, std::vector<std::string> argument);
 		void CHANGE_Operator(Client *client, Server *serv, bool add, std::vector<std::string> argument);
