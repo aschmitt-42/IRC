@@ -228,7 +228,7 @@ void Channel::CHANGE_Operator(Client *client, Server *serv, bool add, std::vecto
 
 void Channel::USER_Limit(bool add, std::vector<std::string> argument)
 {
-	 if (add == false)
+	if (add == false)
 	 	_nb_max_user = 0;
 	else
 	{

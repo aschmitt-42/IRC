@@ -17,7 +17,15 @@
     - [ ] A faire
 
 [ ] User a finir
-    - [ ] message d'erreur
+    - [ ] Recuperer realname au complet
+
+[ ] ClientList 
+    - [ ] rajouter @ pour operateur
+
+[ ] Join TEST
+    -[ ] join avec des cles en creant le channels
+    -[ ] join avec des cles un channel deja existant 
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////                                                     TEST                                                                                   ///////

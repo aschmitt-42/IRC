@@ -55,31 +55,15 @@ void Server::USER(Client *client, std::vector<std::string>argument)
 {
     std::cout << "USER DETECTED" << std::endl;
     
-    if (argument.size() != 4)
+    if (argument.size() < 4)
         return ERR(client, 461, "USER", "Not enough parameters");
     
     if (client->_registred_user == 1)
         return ERR(client, 462, "", "Unauthorized command (already registered)");
 
-    /*
-    VERIF USERNAME --> ERR_ERRONEUSUSERNAME : "491 <user> :Erroneous username"
-
-    if (argument[0].empty() || argument[0].size() > 9)
-        return ERR(client, 432, "USER", "Erroneous nickname");
-
-    if ()
-
-    */
-
-    // PAS SUR 
-    // if (argument[1].size() != 1 || !std::isdigit(argument[1][0]))
-    //    return ERR(client, 1, "", "mode isnt numeric or too long [0 - 9]");
+    client->SET_Username(argument); // RECUPERER REALNAME COMPLET
     
-    // if (username already exist)
-
-    client->SET_Username(argument);
-    // client->Send_message("Username valid, welcome" + argument[0]);
-    
+    // MESSAGE IF USER FINISH REGISTRATION
     if (client->_registred_user == 0 && client->_registred_password == 1 && !client->get_nick().empty())
         MessageRegister(client);
     client->_registred_user = 1;
@@ -100,9 +84,6 @@ void Server::QUIT(Client *client, std::string msg)
     disconect_client(client);
     for (size_t i = 0; i < _channels.size(); ++i)
         _channels[i]->DELETE_User(client);
-
-    (void)client;
-    (void)msg;//envoyer le message aux client qui partage le meme channel
 }
 
 
@@ -218,10 +199,11 @@ void Server::PING(Client *client, std::vector<std::string> argument)
 {
     std::cout << "PING DETECTED" << std::endl;
     std::string msg;
+
     if (argument.size() < 1)
-    msg = ":localhost PONG :";
+        msg = ":localhost PONG :";
     else
-    msg = ":localhost PONG :" + argument[0];
+        msg = ":localhost PONG :" + argument[0];
     client->Send_message(msg);
 }
 
@@ -253,9 +235,14 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
         prv_msg.clear();
     }
 
-    if (destination[0] == '#') // ou autre caractere accepter de debut de channel
+
+    // if (prv_msg.empty())
+    //     return ERR(client, 412, destination, "No text to send");
+
+    if (destination[0] == '#' || destination[0] == '&') // ou autre caractere accepter de debut de channel
     {
         std::cout << "PRIVMSG TO CHANNEL "<< std::endl;
+
         Channel *channel = CHANNEL_Exist(destination);
         if (!channel)
             return ERR(client, 403, destination, "No such channel");
@@ -266,6 +253,7 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
     else
     {
         std::cout << "PRIVMSG DIRECT TO ANOTHER CLIENT "<< std::endl;
+        
         Client *target_client = FINDING_Client_str(destination);
         if (!target_client)
             return ERR(client, 401, destination, "No such nick/channel");
