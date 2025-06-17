@@ -1,9 +1,8 @@
 #To Do List
 
-
 [ ] MODE
     - [ ] Mode avec que le nom du channel Envoyer tout les modes
-    - [ ] implementer tout l'ajout et la supression des modes
+    - [ ] A pofiner
 
 [ ] TOPIC 
     - [ ] recupere le topic en entier 
@@ -12,99 +11,15 @@
 [ ] Msg de hexchat
     - [ ] CAP LS 302
 
-[ ] Finir PING PONG 
-    - [ ] Envoyer des ping toute les 60sec pour voir si le client et toujours la ????? 
-    - [ ] 
-    - [ ] 
-// Ton serveur doit envoyer un PING périodiquement après une période d'inactivité, c’est-à-dire quand le client n'a rien envoyé depuis un certain temps.
+[ ] QUIT A tester
 
-[ ] Invite commande 
-    - [ ] ERR_NEEDMOREPARAMS    461 : "<command> :Not enough parameters"            
-    - [ ] ERR_NOSUCHNICK        401 : "<nickname> :No such nick/channel"            - Used to indicate the nickname parameter supplied to a command is currently unused.
-    - [ ] ERR_NOSUCHCHANNEL     403 : "<channel name> :No such channel"             - Used to indicate the given channel name is invalid.
-    - [ ] ERR_NOTONCHANNEL      442 : "<channel> :You're not on that channel"       - Returned by the server whenever a client tries to perform a channel affecting command for which the client isn't a member.
-    - [ ] ERR_USERONCHANNEL     443 : "<user> <channel> :is already on channel"     - Returned when a client tries to invite a user to a channel they are already on.
-    - [ ] ERR_CHANOPRIVSNEEDED  482 : "<channel> :You're not channel operator"      - Commande need to be use by operator
-    -----REPONSE------
-    - [ ] RPL_INVITING
-    - [ ] RPL_AWAY
+[ ] KICK
+    - [ ] A faire
 
-KICK
-topic un seul message
-quit
-pofiner mods
+[ ] User a finir
+    - [ ] message d'erreur
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////                                                     TEST                                                                                   ///////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    - [ ] Join channel FULL                     :localhost 471 <channel> :Cannot join channel (+l)
-    - [ ] Join channel ou pas invite            :localhost 473 <channel> :Cannot join channel (+i)
-    - [ ] Join channel avec pas bon password    :localhost 475 <channel> :Cannot join channel (+b)
-
-
---------IRC_PARSER--------
-MODE #test +l
---------------------------
-
-MODE DETECTED
-[1]    16120 segmentation fault (core dumped)  ./ircserv 4444 JEAN
-
-
-
-
-JOIN COMMMANDE :
-    - verifier si au moins 1 arg pour le nom de channel
-    - arg[1] = channel name "#test,#test2" --- split ','
-    - arg[2] = key "jean,jean" --- split ',' (pas forcement de key)
-    - parcour le tableau de channelnames
-        - recuperer key si il y en a une
-        - verifie si channelname == vide // si il commance par bon caractere
-        - trouver ou creer le channel
-        - ajouter client et channel
-        - Notifier les autres clients dans le canal
-        - Envoyer le sujet du canal (RPL_TOPIC ou RPL_NOTOPIC) au client 
-        - Envoyer la liste des membres du canal (commande NAMES)
-
-
-
-/* Error Responses */
-
-#define ERR_NOTREGISTERED(source)                       "451 " + source + " :You have not registered"
-#define ERR_ALREADYREGISTERED(source)                   "462 " + source + " :You may not register"
-#define ERR_PASSWDMISMATCH(source)                      "464 " + source + " :Password is incorrect"
-#define ERR_NONICKNAMEGIVEN(source)                     "431 " + source + " :Nickname not given"
-#define ERR_NICKNAMEINUSE(source)                       "433 " + source + " " + source  + " :Nickname is already in use"
-
-#define ERR_UNKNOWNCOMMAND(source, command)             "421 " + source + " " + command + " :Unknown command"
-#define ERR_NEEDMOREPARAMS(source, command)             "461 " + source + " " + command + " :Not enough parameters"
-
-#define ERR_TOOMANYCHANNELS(source, channel)            "405 " + source + " " + channel + " :You have joined too many channels"
-#define ERR_NOTONCHANNEL(source, channel)               "442 " + source + " " + channel + " :You're not on that channel"
-#define ERR_NOSUCHCHANNEL(source, channel)              "403 " + source + " " + channel + " :No such channel"
-#define ERR_BADCHANNELKEY(source, channel)              "475 " + source + " " + channel + " :Cannot join channel (+k)"
-#define ERR_CHANNELISFULL(source, channel)              "471 " + source + " " + channel + " :Cannot join channel (+l)"
-#define ERR_CANNOTSENDTOCHAN(source, channel)           "404 " + source + " " + channel + " :Cannot send to channel"
-#define ERR_CHANOPRIVSNEEDED(source, channel)           "482 " + source + " " + channel + " :You're not channel operator"
-
-#define ERR_NOSUCHNICK(source, nickname)                "401 " + source + " " + nickname + " :No such nick/channel"
-#define ERR_USERNOTINCHANNEL(source, nickname, channel) "441 " + source + " " + nickname + " " + channel + " :They aren't on that channel"
-
-
-/* Numeric Responses */
-
-#define RPL_WELCOME(source)                             "001 " + source + " :Welcome " + source + " to the ft_irc network"
-#define RPL_NAMREPLY(source, channel, users)            "353 " + source + " = " + channel + " :" + users
-#define RPL_ENDOFNAMES(source, channel)                 "366 " + source + " " + channel + " :End of /NAMES list."
-
-
-/* Command Responses */
-
-#define RPL_JOIN(source, channel)                       ":" + source + " JOIN :" + channel
-#define RPL_PART(source, channel)                       ":" + source + " PART :" + channel
-#define RPL_PING(source, token)                         ":" + source + " PONG :" + token
-#define RPL_PRIVMSG(source, target, message)            ":" + source + " PRIVMSG " + target + " :" + message
-#define RPL_NOTICE(source, target, message)             ":" + source + " NOTICE " + target + " :" + message
-#define RPL_QUIT(source, message)                       ":" + source + " QUIT :Quit: " + message
-#define RPL_KICK(source, channel, target, reason)       ":" + source + " KICK " + channel + " " + target + " :" + reason
-#define RPL_MODE(source, channel, modes, args)          ":" + source + " MODE " + channel + " " + modes + " " + args
