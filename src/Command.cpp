@@ -329,20 +329,20 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
         return ERR(client, 482, channel_name, "You're not channel operator");
     
     std::vector<ModChange> result = MODE_Parser(client, argument);
-    std::cout << "END OF MODE PARSER "<< result.size() << std::endl;
+    std::cout << "END OF MODE PARSER " << std::endl;
 
     for (size_t i = 0; i < result.size(); ++i)
     {
         if (result[i].mode == 'i')
             channel->INVITE_Only(result[i].add, client);
         else if (result[i].mode == 't')
-            channel->TOPIC_Restriction(result[i].add);
+            channel->TOPIC_Restriction(client, result[i].add);
         else if (result[i].mode == 'k')
-            channel->CHANGE_Pass(result[i].add, result[i].argument);
+            channel->CHANGE_Pass(client, result[i].add, result[i].argument);
         else if (result[i].mode == 'o')
             channel->CHANGE_Operator(client, this, result[i].add, result[i].argument);
         else if (result[i].mode == 'l')
-            channel->USER_Limit(result[i].add, result[i].argument);
+            channel->USER_Limit(client, result[i].add, result[i].argument);
         else
             std::cout << "WRONG MODE, ERROR : " << result[i].mode << std::endl;
     }

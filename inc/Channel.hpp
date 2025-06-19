@@ -56,7 +56,6 @@ class Channel
 		~Channel();
 
 		std::string	ClientList();
-		void		SEND_Msg_to_everyone(std::string msg, Client *client);
 		void		SEND_Msg(std::string msg, Client *client);
 		void		DELETE_User(Client *client);
 		void		Send_Msg_To_All_Client(std::string msg);
@@ -68,10 +67,10 @@ class Channel
 
 		//MOD
 		void INVITE_Only(bool add, Client *client);
-		void TOPIC_Restriction(bool add);
-		void CHANGE_Pass(bool add, std::vector<std::string> argument);
+		void TOPIC_Restriction(Client *client, bool add);
+		void CHANGE_Pass(Client *client, bool add, std::vector<std::string> argument);
 		void CHANGE_Operator(Client *client, Server *serv, bool add, std::vector<std::string> argument);
-		void USER_Limit(bool add, std::vector<std::string> argument);
+		void USER_Limit(Client *client, bool add, std::vector<std::string> argument);
 
 		//GETTER
 		std::string	GET_Topic(){return _topic;}
