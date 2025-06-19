@@ -159,13 +159,6 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
         msg = ":localhost 366 " + client->get_nick() + " " + channel_name + " :End of NAMES list";
         client->Send_message(msg);
     }
-    
-
-    ////////////
-    // KEYS   //
-    ////////////
-    
-    
 }
 
 
@@ -224,6 +217,9 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
         if (second_space != std::string::npos)
         {
             prv_msg = prv_msg.substr(second_space + 1);
+            if (prv_msg[0] == ':')
+                prv_msg = prv_msg.substr(1);
+            std::cout << "prv 0 = " << prv_msg[0] << std::endl;
         } 
         else 
         {

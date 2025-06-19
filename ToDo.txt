@@ -19,15 +19,25 @@
 [ ] User a finir
     - [ ] Recuperer realname au complet
 
-[ ] ClientList 
-    - [ ] rajouter @ pour operateur
 
 [ ] Join TEST
     -[ ] join avec des cles en creant le channels
-    -[ ] join avec des cles un channel deja existant 
+    -[ ] join avec des cles un channel deja existant
+    -[ ] ClientList a tester lorsque qu'un utilisateur rejoin un channels avec 2 operateur
+            verifier que le client remarque qu'il y en a 2....
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////                                                     TEST                                                                                   ///////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
+
+-------------IRC_PARSER-------------
+MODE #test +l nick2
+------------------------------------
+
+MODE DETECTED
+MODE PARSER DETECTED
+ERR DETECTED ID:461
+END OF MODE PARSER
+
