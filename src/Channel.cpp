@@ -8,7 +8,7 @@ Channel::Channel(std::string channel_name, std::string topic_name, Client *clien
 	_topic = topic_name;
 	_topic_restriction = false;
 	_password = "";
-	_invite_only = true;
+	_invite_only = false;
 	_nb_max_user = 0;
 	_operator.push_back(client);
 	_server = server;

@@ -1,6 +1,8 @@
 #include "Server.hpp"
 #include "Client.hpp"
 
+bool running(true);
+
 Server::Server(std::string port, std::string password)
 {
 	_port = port;
@@ -19,8 +21,12 @@ Server::~Server()
     {
         delete _clients[i];
     }
+    for (size_t i = 0; i < _channels.size(); i++)
+    {
+        delete _channels[i];
+    }
     
-    std::cout << "Destructor Server called" << std::endl; 
+    //std::cout << "Destructor Server called" << std::endl; 
 }
 
 
@@ -130,20 +136,20 @@ Client* Server::FINDING_Client_str(std::string  username)
     return NULL;
 }
 
-
 void	Server::start()
 {
 	std::cout << "---- SERVER ----\n" << std::endl;
 
     pollfd server_fd = {_server_socket, POLLIN, 0};
     _poll_fds.push_back(server_fd);
-    while (1) 
+    while (running) 
     {    
         int status = poll(_poll_fds.begin().base(), _poll_fds.size(), -1);
         
         if (status == -1) {
             std::cerr << "[Server] Poll error: " << strerror(errno) << std::endl;
-            exit(1);
+            std::cout << "Server Stopper, Bye !!!" << std::endl;
+            return;
         }
         
         Client *client;
@@ -168,6 +174,13 @@ void	Server::start()
         }
     }
 }
+
+void signal_handler(int signum) 
+{
+    std::cout << "\n[INFO] SIGNAL : " << signum << " RECEIVED\n";
+    running = false;
+}
+
 
 // if (it->revents & POLLERR) {
 //     std::cerr << "[Server] Error on fd: " << it->fd << std::endl;

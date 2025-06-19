@@ -22,7 +22,7 @@
 # include <vector>
 # include <sstream>
 # include <algorithm>
-
+#include <csignal>
 
 class Server
 {
@@ -62,7 +62,7 @@ class Server
 		void PONG(Client *client, std::vector<std::string>argument);
 		void QUIT(Client *client, std::string msg);
 		void JOIN(Client *user, std::vector<std::string> argument);
-		void KICK(Client *client, std::vector<std::string> argument);
+		void KICK(Client *client, std::vector<std::string> argument, std::string msg);
 		void INVITE(Client *client, std::vector<std::string> argument);
 		void TOPIC(Client *client, std::vector<std::string> argument);
 		void MODE(Client *client, std::vector<std::string> argument);
@@ -82,6 +82,7 @@ std::string intToString(int number);
 bool isValidNick(const std::string& nick);
 std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argument);
 std::vector<std::string> split(const std::string input, char delimiter);
+void signal_handler(int signum);
 
 
 void	ERR(Client *client, int err_id, std::string command, std::string msg);

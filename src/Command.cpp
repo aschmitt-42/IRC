@@ -389,8 +389,51 @@ void Server::TOPIC(Client *client, std::vector<std::string> argument)
     channel->Send_Msg_To_All_Client(msg);
 }
 
-void Server::KICK(Client *client, std::vector<std::string> argument)
+void Server::KICK(Client *client, std::vector<std::string> arguments, std::string msg)
 {
-    (void)client;
-    (void)argument;
+    std::cout << msg << std::endl;
+    size_t first_space = msg.find(' ');
+    if (first_space != std::string::npos) 
+    {
+        size_t second_space = msg.find(' ', first_space + 1);
+        if (second_space != std::string::npos)
+        {
+            size_t third_space = msg.find(' ', second_space + 1);
+            if (third_space != std::string::npos) 
+                msg = msg.substr(third_space + 2);
+            else 
+                msg.clear();
+        }
+        else 
+        {
+            msg.clear();
+        }
+    } 
+    else 
+    {
+        msg.clear();
+    }
+    std::cout << msg << std::endl;
+    if (arguments.size() < 2)
+        return ERR(client, 461, "Kick", "Not enough parameters");
+    
+    std::string channel_name = arguments[0];
+    Channel *channel = CHANNEL_Exist(channel_name);
+    if (!channel)
+        return ERR(client, 403, channel_name, "No such channel");
+    
+    if (channel->Is_Operator(client) == 0) // CHECK IF CLIENT IS OPERATOR
+        return ERR(client, 482, channel_name, "You're not channel operator");
+    
+    if (channel->Client_in_Channel(client->get_nick()) == 0) // CHECK IF CLIENT IS IN THE CHANNEL
+        return ERR(client, 442, channel_name, "You're not on that channel");
+    
+    if (channel->Client_in_Channel(arguments[1]) == 0) // CHECK IF CLIENT IS IN THE CHANNEL
+        return ERR(client, 441, arguments[1] + " " + channel_name, "They aren't on that channel");
+    if (msg.empty())
+        msg = "Kick";
+    channel->Send_Msg_To_All_Client(":" + client->get_Prefix() + " KICK " + channel->GET_Name() + " " + arguments[1] + " :" + msg);
+    channel->DELETE_User(FINDING_Client_str(arguments[1]));
+    //channel->Send_Msg_To_All_Client(": " + client->get_Prefix() + " KICK " + channel->GET_Name() + " " + arguments[1] + " :" + msg);
+    //channel->SEND_Msg_to_everyone("Kick " + arguments[1] + " From " + channel_name + " using " + msg + " as the reason.", client);
 }
