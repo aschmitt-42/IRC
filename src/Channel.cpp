@@ -79,7 +79,8 @@ std::string	Channel::ClientList() // rajouter @ pour operateur
 
 	for (size_t i = 0; i < _client.size(); i++)
 	{
-		
+		if (Is_Operator(_client[i]))
+			client_list += "@";
 		client_list += _client[i]->get_nick();
 		if (i != _client.size() - 1)
 			client_list += " ";
@@ -146,7 +147,7 @@ int	Channel::Is_Operator(Client *client)
 
 std::string Channel::GET_Mode_List()
 {
-	std::string mode_list = "";
+	std::string mode_list = "+";
 
 	if (_invite_only)
 		mode_list += "i";
