@@ -333,12 +333,10 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
         return ERR(client, 482, channel_name, "You're not channel operator");
     
     std::vector<ModChange> result = MODE_Parser(client, argument);
-    std::cout << "END OF MODE PARSER"<< std::endl;
+    std::cout << "END OF MODE PARSER "<< result.size() << std::endl;
 
     for (size_t i = 0; i < result.size(); ++i)
     {
-        if (result.size() == 0)
-            break;
         if (result[i].mode == 'i')
             channel->INVITE_Only(result[i].add, client);
         else if (result[i].mode == 't')
@@ -349,6 +347,8 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
             channel->CHANGE_Operator(client, this, result[i].add, result[i].argument);
         else if (result[i].mode == 'l')
             channel->USER_Limit(result[i].add, result[i].argument);
+        else
+            std::cout << "WRONG MODE, ERROR : " << result[i].mode << std::endl;
     }
 }
 
@@ -387,4 +387,10 @@ void Server::TOPIC(Client *client, std::vector<std::string> argument)
 
     msg = client->get_Prefix() + " TOPIC " + channel_name + " :" + channel->GET_Topic(); // pas sur du msg, client ne recois rien comme quoi topic a ete change
     channel->Send_Msg_To_All_Client(msg);
+}
+
+void Server::KICK(Client *client, std::vector<std::string> argument)
+{
+    (void)client;
+    (void)argument;
 }

@@ -212,6 +212,8 @@ void Channel::CHANGE_Pass(bool add, std::vector<std::string> argument)
 
 void Channel::CHANGE_Operator(Client *client, Server *serv, bool add, std::vector<std::string> argument)
 {
+	for (size_t i = 0; i < argument.size(); ++i)
+		std::cout << argument[i] << std::endl;
 	if (!Is_Operator(client))
 		return ERR(client, 482, _name, "You're not channel operator");
 	Client *target_client = serv->FINDING_Client_str(argument[0]);

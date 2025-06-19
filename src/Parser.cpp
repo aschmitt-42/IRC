@@ -89,8 +89,8 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 		serv->MODE(client, argument);
 	else if (cmd == "TOPIC")
 		serv->TOPIC(client, argument);
-	// else if (cmd == "KICK")
-	// 	serv->KICK(client, argument);
+	 else if (cmd == "KICK")
+	 	serv->KICK(client, argument);
 	
 	
 }
