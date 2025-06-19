@@ -41,20 +41,9 @@ void	Channel::DELETE_User(Client *client)
 	}
 }
 
-void	Channel::SEND_Msg_to_everyone(std::string add, Client *client)
-{
-	std::string msg;
-	msg = ":" + client->get_nick() + "!" + client->get_username() + "@" + "localhost";
-    msg += " PRIVMSG " + _name + " " + add;
-	for (size_t	i = 0; i < _client.size(); ++i)
-	{
-		_client[i]->Send_message(msg);
-	}
-}
 
 void	Channel::SEND_Msg(std::string msg, Client *client)
 {
-	// msg = "[" + client->get_username() + "]" + " : " + msg;
 	std::cout << "SEND_MSG TO CHANNEL " << msg << std::endl;
 
 	for (size_t	i = 0; i < _client.size(); ++i)
@@ -145,6 +134,10 @@ int	Channel::Is_Operator(Client *client)
 	return 0;
 }
 
+
+/////////////////    MOD     /////////////////
+
+
 std::string Channel::GET_Mode_List()
 {
 	std::string mode_list = "+";
@@ -166,53 +159,54 @@ std::string Channel::GET_Mode_List()
 	return mode_list;
 }
 
-
-/////////////////    MOD     /////////////////
-
-
 void Channel::INVITE_Only(bool add, Client *client)
 {
-	std::cout << _name << std::endl;
 	std::string msg;
 	if (add)
 	{
 		if (!_invite_only)
-		{
-			msg = client->get_nick() + " sets mode +i on " + _name;
-			SEND_Msg_to_everyone(msg, client);
-		}
+			msg = ":" + client->get_Prefix() + " MODE " + _name + " +i";
 		_invite_only = true;
 	}
 	else
 	{ 
-	if (_invite_only)
-		{
-			msg = client->get_nick() + " sets mode -i on " + _name;
-			SEND_Msg_to_everyone(msg, client);
-		}
+		if (_invite_only)
+			msg = ":" + client->get_Prefix() + " MODE " + _name + " -i";
 		_invite_only = false;
 	}
+	Send_Msg_To_All_Client(msg);
 }
 
-void Channel::TOPIC_Restriction(bool add)
+void Channel::TOPIC_Restriction(Client *client, bool add)
 {
+	std::string msg = ":" + client->get_Prefix() + " MODE " + _name + " " + (add ? "+" : "-") + "t";
+	Send_Msg_To_All_Client(msg);
+
 	if (add)
 		_topic_restriction = true;
 	else 
 		_topic_restriction = false;
 }
 
-void Channel::CHANGE_Pass(bool add, std::vector<std::string> argument)
+void Channel::CHANGE_Pass(Client *client, bool add, std::vector<std::string> argument)
 {
-
+	std::string msg = ":" + client->get_Prefix() + " MODE " + _name + " " + (add ? "+" : "-") + "k";
+	
 	if (add)//faut il verifier quil y ait un mdp ou meme un mot de passe vide fonctionne
+	{
 		_password = argument[0];
-	else
+		msg += " " + _password;
+	}
+	else	
 		_password = "";
+
+	this->Send_Msg_To_All_Client(msg);
 }
 
 void Channel::CHANGE_Operator(Client *client, Server *serv, bool add, std::vector<std::string> argument)
 {
+	std::cout << "CHANGE OPERATOR DETECTED" << std::endl;
+
 	for (size_t i = 0; i < argument.size(); ++i)
 		std::cout << argument[i] << std::endl;
 	if (!Is_Operator(client))
@@ -227,10 +221,16 @@ void Channel::CHANGE_Operator(Client *client, Server *serv, bool add, std::vecto
 	}
 	if (add == true)
 		_operator.push_back(target_client);
+	
+	std::string msg = ":" + client->get_Prefix() + " MODE " + _name + " " + (add ? "+" : "-") + "o " + target_client->get_nick();
+	this->Send_Msg_To_All_Client(msg);
 }
 
-void Channel::USER_Limit(bool add, std::vector<std::string> argument)
+void Channel::USER_Limit(Client *client, bool add, std::vector<std::string> argument)
 {
+
+	std::string msg = ":" + client->get_Prefix() + " MODE " + _name + " " + (add ? "+" : "-") + "l";
+	
 	if (add == false)
 	 	_nb_max_user = 0;
 	else
@@ -247,7 +247,12 @@ void Channel::USER_Limit(bool add, std::vector<std::string> argument)
 			}
 			_nb_max_user = nb_limit;
 		}
-		//else
-			//err conversion rate
+		else
+		{
+			//err pas un nombre
+			return;
+		}
+		msg += " " + intToString(_nb_max_user);
 	}
+	this->Send_Msg_To_All_Client(msg);
 }
