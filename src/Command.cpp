@@ -72,18 +72,19 @@ void Server::USER(Client *client, std::vector<std::string>argument)
 
 void Server::QUIT(Client *client, std::string msg)
 {
-    std::cout << "QUIT DETECTED" << std::endl;
-    size_t first_space = msg.find(' ');
-    if (first_space != std::string::npos)
-        msg = msg.substr(first_space + 1);
-    else 
-    {
-        msg.clear();
-    }
-    SEND_Quit_Msg(client, msg);
-    disconect_client(client);
-    for (size_t i = 0; i < _channels.size(); ++i)
-        _channels[i]->DELETE_User(client);
+    std::cout << "QUIT DETECTED :" << std::endl;
+    
+    size_t tmp = msg.find(':');
+    if (tmp != std::string::npos)
+        msg = msg.substr(tmp + 1);
+    else
+        msg = "Leaving";
+
+    client->SEND_Quit_Msg(msg); // send message to all clients who are in a channel with the client
+    
+    disconect_client(client);   // remove client from server 
+
+    // delete client;              // delete it
 }
 
 
@@ -205,13 +206,12 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
     if (argument.size() < 2)
         return ERR(client, 461, "PRIVMSG", "Not enough parameters");
 
-
     std::string msg;
     std::string destination = argument[0];
     
     // ENLEVE LE PREFIX
     size_t first_space = prv_msg.find(' ');
-    if (first_space != std::string::npos) 
+    if (first_space != std::string::npos)
     {
         size_t second_space = prv_msg.find(' ', first_space + 1);
         if (second_space != std::string::npos)
@@ -219,23 +219,17 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
             prv_msg = prv_msg.substr(second_space + 1);
             if (prv_msg[0] == ':')
                 prv_msg = prv_msg.substr(1);
-            std::cout << "prv 0 = " << prv_msg[0] << std::endl;
         } 
-        else 
-        {
+        else
             prv_msg.clear();
-        }
     } 
-    else 
-    {
+    else
         prv_msg.clear();
-    }
-
 
     // if (prv_msg.empty())
     //     return ERR(client, 412, destination, "No text to send");
 
-    if (destination[0] == '#' || destination[0] == '&') // ou autre caractere accepter de debut de channel
+    if (destination[0] == '#' || destination[0] == '&')
     {
         std::cout << "PRIVMSG TO CHANNEL "<< std::endl;
 
@@ -393,29 +387,22 @@ void Server::TOPIC(Client *client, std::vector<std::string> argument)
 
 void Server::KICK(Client *client, std::vector<std::string> arguments, std::string msg)
 {
-    std::cout << msg << std::endl;
-    size_t first_space = msg.find(' ');
-    if (first_space != std::string::npos) 
+    std::cout << "KICK DETECTED" << std::endl;
+    
+    std::cout << "avant :" << msg << std::endl;
+
+    size_t tmp = msg.find(':');
+    if (tmp != std::string::npos)
     {
-        size_t second_space = msg.find(' ', first_space + 1);
-        if (second_space != std::string::npos)
-        {
-            size_t third_space = msg.find(' ', second_space + 1);
-            if (third_space != std::string::npos) 
-                msg = msg.substr(third_space + 2);
-            else 
-                msg.clear();
-        }
-        else 
-        {
+        msg = msg.substr(tmp + 1);
+        if (msg.empty())
             msg.clear();
-        }
-    } 
-    else 
-    {
-        msg.clear();
     }
-    std::cout << msg << std::endl;
+    else
+        msg.clear();
+
+    std::cout << "APRES " << msg << std::endl;
+
     if (arguments.size() < 2)
         return ERR(client, 461, "Kick", "Not enough parameters");
     
@@ -434,6 +421,7 @@ void Server::KICK(Client *client, std::vector<std::string> arguments, std::strin
         return ERR(client, 441, arguments[1] + " " + channel_name, "They aren't on that channel");
     if (msg.empty())
         msg = "Kick";
+    
     channel->Send_Msg_To_All_Client(":" + client->get_Prefix() + " KICK " + channel->GET_Name() + " " + arguments[1] + " :" + msg);
     channel->DELETE_User(FINDING_Client_str(arguments[1]));
     //channel->Send_Msg_To_All_Client(": " + client->get_Prefix() + " KICK " + channel->GET_Name() + " " + arguments[1] + " :" + msg);
@@ -449,7 +437,6 @@ void Server::PART(Client *client, std::vector<std::string>argument, std::string 
     
     Channel     *channel;
     std::string channel_name;
-    std::string msg;
     std::vector<std::string> Names = split(argument[0], ',');
     std::string keys;
 
@@ -458,7 +445,7 @@ void Server::PART(Client *client, std::vector<std::string>argument, std::string 
     {
         keys = message.substr(tmp + 1);
         if (keys.empty())
-        keys = "Leaving";
+            keys = "Leaving";
     }
     else
         keys = "Leaving";
@@ -475,8 +462,7 @@ void Server::PART(Client *client, std::vector<std::string>argument, std::string 
         if (channel->Client_in_Channel(client->get_nick()) == 0)
             return ERR(client, 442, channel_name, "You're not on that channel");
         
-        msg = ":" + client->get_Prefix() + " PART " + channel_name + " :" + keys;
-        channel->Send_Msg_To_All_Client(msg);
+        channel->Send_Msg_To_All_Client(":" + client->get_Prefix() + " PART " + channel_name + " :" + keys);
         channel->DELETE_User(client);
     }
 

@@ -19,7 +19,8 @@
 # include <sys/poll.h>
 # include <sys/socket.h>
 # include <vector>
-# include "Client.hpp"
+
+class Client;
 
 class Server;
 

@@ -19,24 +19,22 @@
 # include <sys/poll.h>
 # include <sys/socket.h>
 # include <vector>
-
-class Channel;
+# include "Channel.hpp"
 
 class Client
 {
 	private :
 		int						_client_fd;
 
-
 		pollfd					_client_poll;
 		std::vector<Channel*>	_channels;
 
-		std::string	_nickname;
-		std::string	_username;
-		std::string	_realname;
-		std::string	_msg;
-		int			_mode;
-		std::string	_hostname;
+		int						_mode;
+		std::string				_nickname;
+		std::string				_username;
+		std::string				_realname;
+		std::string				_msg;
+		std::string				_hostname;
 		
 	public :
 		int 		_registred_password;
@@ -45,29 +43,28 @@ class Client
 		Client(pollfd client_poll, int client_fd);
 		~Client();
 
-		void	Join_Channel(Channel *channel);
-		// void	DELETE_Channel(){_channel = NULL;}
-
-		void	Send_message(std::string msg);
 		int		REGISTRED();
+		void	Send_message(std::string msg);
+		void	Join_Channel(Channel *channel);
 
-		std::string 	get_Prefix() const;
-
+		void	SET_Username(std::vector<std::string> argument);
+		void	SEND_Quit_Msg(std::string msg);
+		
 		//GETTER
-		std::string		get_nick(){return _nickname;} 
-		std::string		get_username(){return _username;}
-		std::string		get_hostname(){return _hostname;}
-		std::string&	get_message(){return _msg;}
-		pollfd			get_pollfd(){return _client_poll;}
-		// Channel			*get_channel(){return _channel;}
-		int				get_clientfd(){return _client_fd;}
+		int				get_clientfd()	{return _client_fd;}
+		pollfd			get_pollfd()	{return _client_poll;}
+		std::string		get_nick()		{return _nickname;} 
+		std::string&	get_message()	{return _msg;}
+		std::string		get_hostname()	{return _hostname;}
+		std::string		get_username()	{return _username;}
+		std::string 	get_Prefix() const;
 
 		//SETTER
 		void			SET_Nick(std::string nick){_nickname = nick;}
-		void			SET_Username(std::vector<std::string> argument);
+
 
 };
 
-// std::ostream& operator<<(std::ostream& os, const Client& other);
+int     IS_Client_In_Vector(std::vector<Client*> client_vector, Client *client);
 
 #endif

@@ -44,8 +44,6 @@ void	Channel::DELETE_User(Client *client)
 
 void	Channel::SEND_Msg(std::string msg, Client *client)
 {
-	std::cout << "SEND_MSG TO CHANNEL " << msg << std::endl;
-
 	for (size_t	i = 0; i < _client.size(); ++i)
 	{
 		if (_client[i]->get_nick() != client->get_nick())

@@ -12,8 +12,6 @@
 [ ] Msg de hexchat
     - [ ] CAP LS 302
 
-[ ] QUIT A tester
-
 [ ] KICK
     - [ ] A faire
 
@@ -21,12 +19,6 @@
     - [ ] Recuperer realname au complet
 
 
-[ ] Join TEST
-    -[ ] join avec des cles en creant le channels
-    -[ ] join avec des cles un channel deja existant
-
-[ ] QUIT 
-    -[ ] client utilise commande QUIT tout les clients connecter au channel ne recoive pas le messasge qu'il quit
 
 [ ] PART A FINIR
 
@@ -35,19 +27,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
 
--------------IRC_PARSER-------------
-MODE #test +l nick2
-------------------------------------
+maybe void Client::SEND_Quit_Msg(std::string msg) SEGFAULT
 
-MODE DETECTED
-MODE PARSER DETECTED
-ERR DETECTED ID:461
-END OF MODE PARSER
-
-
-
--------------IRC_PARSER-------------
-PART #test :Leaving
-------------------------------------
-
-CMD EMPTY
+erreur valgrind sur read data from socket, cela viens surrement lorsqu'un client quitte le server

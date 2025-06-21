@@ -39,15 +39,16 @@ void Server::disconect_client(Client *client)
             break;
         }
     }
+
     for (std::size_t i = 0; i < _clients.size(); i++){
         if (_clients[i]->get_clientfd() == client->get_clientfd())
         {
-            // maybe close de fd
-            close(client->get_clientfd());
             _clients.erase(_clients.begin() + i);
             break;
         }
     }
+    close(client->get_clientfd());
+    delete client;
 }
 
 
@@ -78,17 +79,17 @@ void Server::accept_new_connection()
 
 void Server::read_data_from_socket(Client *client)
 {
+    if (std::find(_clients.begin(), _clients.end(), client) == _clients.end()) 
+    {
+        std::cerr << "[Server] Attempted to read from a disconnected client" << std::endl;
+        return;
+    }
+
+
     char buffer[1024];
     
     int bytes_read = recv(client->get_clientfd(), buffer, sizeof(buffer) - 1, 0);
-    if (bytes_read < 0) { // && errno != EWOULDBLOCK
-        std::cerr << "[Server] Recv error: " << strerror(errno) << std::endl;
-        this->disconect_client(client);
-        return ;
-    }
-
-    if (bytes_read == 0){
-        std::cout << "[Server] " << client->get_nick() << ", client fd " << client->get_clientfd() << " disconnected" << std::endl;
+    if (bytes_read <= 0) { // && errno != EWOULDBLOCK
         this->disconect_client(client);
         return ;
     }

@@ -18,7 +18,32 @@ Client::Client(pollfd client_poll, int client_fd)
 
 Client::~Client()
 {
-	// std::cout << "Destructor called" << std::endl;
+	// std::cout << "Destructor called on " << _nickname << std::endl;
+}
+
+void Client::SEND_Quit_Msg(std::string msg)
+{
+	std::vector<Client*> sended_client;
+    std::vector<Client*> tmp;
+
+	for (size_t i = 0; i < _channels.size(); ++i)
+	{
+		tmp = _channels[i]->GET_Clients_Vector();
+
+		for (std::vector<Client*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+		{
+			if (!IS_Client_In_Vector(sended_client, *it) && this != *it)
+			{
+				(*it)->Send_message(":" + _nickname + "!" + _username + "@localhost" + " QUIT :" + msg);
+				sended_client.push_back(*it);
+			}
+		}
+	}
+
+	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		(*it)->DELETE_User(this);
+	}
 }
 
 void Client::Send_message(std::string msg)
