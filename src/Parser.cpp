@@ -12,8 +12,8 @@ std::string CMD_Finder(std::string msg)
 	if (pos != std::string::npos)
 	{
 		cmd = msg.substr(0, pos);
-		std::string possible_cmd[12] = {"PASS", "NICK", "USER", "QUIT", "PONG", "PING", "PRIVMSG", "KICK", "JOIN", "TOPIC", "INVITE", "MODE"};
-		for (size_t i = 0; i != 12; i++)
+		std::string possible_cmd[13] = {"PASS", "NICK", "USER", "QUIT", "PONG", "PING", "PRIVMSG", "KICK", "JOIN", "TOPIC", "INVITE", "MODE", "PART"};
+		for (size_t i = 0; i != 13; i++)
 		{
 			if (cmd == possible_cmd[i])
 				return cmd;
@@ -56,10 +56,9 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 
 	std::vector<std::string> argument = ARG_Finder(msg);
 	
+	
 	if (cmd == "PASS")
 		return serv->PASS(client, argument);
-	// else if (!client->_registred_password)
-	// 	return ERR(client, 1, "", "You Need to enter the password first");
 	else if (cmd == "NICK")
 		return serv->NICK(client, argument);
 	else if (cmd == "USER")
@@ -69,7 +68,6 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 	else if (cmd == "PING")
 		return serv->PING(client, argument);
 	
-
 	if (!client->REGISTRED())
 	{
 		if (client->get_nick().empty()) 
@@ -89,8 +87,8 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 		serv->MODE(client, argument);
 	else if (cmd == "TOPIC")
 		serv->TOPIC(client, argument);
-	 else if (cmd == "KICK")
+	else if (cmd == "KICK")
 	 	serv->KICK(client, argument, msg);
-	
-	
+	else if (cmd == "PART")
+		serv->PART(client, argument, msg);
 }

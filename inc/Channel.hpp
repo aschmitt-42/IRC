@@ -45,7 +45,6 @@ class Channel
 		std::string				_name;
 		std::string				_topic;
 		std::string				_password;
-		// Client					*_client_owner;
 		size_t					_nb_max_user;
 		bool					_invite_only;
 		bool					_topic_restriction;
@@ -56,33 +55,34 @@ class Channel
 		~Channel();
 
 		std::string	ClientList();
-		void		SEND_Msg(std::string msg, Client *client);
-		void		DELETE_User(Client *client);
-		void		Send_Msg_To_All_Client(std::string msg);
+
 		int			Add_User(Client *client);
+		int			Is_Operator(Client *client);
 		int			Try_Join(Client *client, std::string key);
 		int			Client_in_Channel(std::string client_name);
 		int			Try_Invite(Client *client, Client *new_client);
-		int			Is_Operator(Client *client);
+
+		void		DELETE_User(Client *client);
+		void		Send_Msg_To_All_Client(std::string msg);
+		void		SEND_Msg(std::string msg, Client *client);
 
 		//MOD
 		void INVITE_Only(bool add, Client *client);
 		void TOPIC_Restriction(Client *client, bool add);
+		void USER_Limit(Client *client, bool add, std::vector<std::string> argument);
 		void CHANGE_Pass(Client *client, bool add, std::vector<std::string> argument);
 		void CHANGE_Operator(Client *client, Server *serv, bool add, std::vector<std::string> argument);
-		void USER_Limit(Client *client, bool add, std::vector<std::string> argument);
 
 		//GETTER
-		std::string	GET_Topic(){return _topic;}
-		std::string	GET_Name(){return _name;}
-		std::string GET_Mode_List();
-		std::vector<Client*>	GET_Clients_Vector(){return _client;}
+		int 					GET_Nb_User()			{return _client.size();}
+		std::string				GET_Name()				{return _name;}
+		std::string				GET_Topic()				{return _topic;}
+		std::string 			GET_Mode_List();
+		std::vector<Client*>	GET_Clients_Vector()	{return _client;}
 		
-		bool	Is_Topic_Restriction(){return _topic_restriction;}
-		bool	Is_Invite_Only(){return _invite_only;}
-
-		
-		void		SET_Topic(std::string new_topic){_topic = new_topic;}
+		bool	Is_Topic_Restriction()					{return _topic_restriction;}
+		bool	Is_Invite_Only()						{return _invite_only;}
+		void	SET_Topic(std::string new_topic)		{_topic = new_topic;}
 };
 
 #endif
