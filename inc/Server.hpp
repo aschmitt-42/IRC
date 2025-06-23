@@ -64,7 +64,7 @@ class Server
 		void PONG(Client *client, std::vector<std::string>argument);
 		void JOIN(Client *client, std::vector<std::string>argument);
 		void MODE(Client *client, std::vector<std::string>argument);
-		void TOPIC(Client *client, std::vector<std::string>argument);
+		void TOPIC(Client *client, std::vector<std::string>argument, std::string msg);
 		void INVITE(Client *client, std::vector<std::string>argument);
 		void PART(Client *client, std::vector<std::string>argument, std::string msg);
 		void KICK(Client *client, std::vector<std::string> argument, std::string msg);

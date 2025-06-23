@@ -5,7 +5,6 @@
     - [ ] A pofiner
 
 [ ] TOPIC 
-    - [ ] recupere le topic en entier 
     - [ ] message de 1er topic 
     - [ ] message de changement de topic
      

@@ -121,8 +121,16 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
             continue;
         }
 
+        for (size_t i = 0; i < channel_name.size(); ++i)
+        {
+            if (channel_name[i] == ',' || channel_name[i] == ':'|| channel_name[i] == ' ' || channel_name[i] == '\0')
+            {
+                ERR(client, 403, client->get_nick() + " " + channel_name , "No such channel");
+                continue;
+            }
+        }
+
         channel = CHANNEL_Exist(channel_name);
-    
         if (!channel)
         {
             channel = new Channel(channel_name, "", client, this);
@@ -340,7 +348,7 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
     }
 }
 
-void Server::TOPIC(Client *client, std::vector<std::string> argument)
+void Server::TOPIC(Client *client, std::vector<std::string> argument, std::string new_topic)
 {
     std::cout << "TOPIC DETECTED" << std::endl;
 
@@ -377,7 +385,12 @@ void Server::TOPIC(Client *client, std::vector<std::string> argument)
     if (argument[1][0] == ':') // ENLEVE LE PREFIX
         argument[1] = argument[1].substr(1);
 
-    channel->SET_Topic(argument[1]); // SET TOPIC mais seulement avec le 1er elements et non toute la phrase
+    size_t tmp = new_topic.find(':');
+    if (tmp != std::string::npos)
+        msg = new_topic.substr(tmp + 1);
+    else
+        msg = " ";
+    channel->SET_Topic(msg); // SET TOPIC mais seulement avec le 1er elements et non toute la phrase
 
     msg = ":" + client->get_Prefix() + " TOPIC " + channel_name + " :" + channel->GET_Topic(); // pas sur du msg, client ne recois rien comme quoi topic a ete change
     channel->Send_Msg_To_All_Client(msg);
