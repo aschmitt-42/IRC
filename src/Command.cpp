@@ -51,7 +51,7 @@ void Server::NICK(Client *client, std::vector<std::string>argument)
         client->SET_Nick(argument[0]);
 }
 
-void Server::USER(Client *client, std::vector<std::string>argument)
+void Server::USER(Client *client, std::vector<std::string>argument, std::string msg)
 {
     std::cout << "USER DETECTED" << std::endl;
     
@@ -61,7 +61,14 @@ void Server::USER(Client *client, std::vector<std::string>argument)
     if (client->_registred_user == 1)
         return ERR(client, 462, "", "Unauthorized command (already registered)");
 
-    client->SET_Username(argument); // RECUPERER REALNAME COMPLET
+    size_t tmp = msg.find(':');
+    if (tmp != std::string::npos)
+        msg = msg.substr(tmp + 1);
+    else
+        msg = argument[3];
+
+
+    client->SET_Username(argument, msg); // RECUPERER REALNAME COMPLET
     
     // MESSAGE IF USER FINISH REGISTRATION
     if (client->_registred_user == 0 && client->_registred_password == 1 && !client->get_nick().empty())
@@ -224,7 +231,12 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
         {
             prv_msg = prv_msg.substr(second_space + 1);
             if (prv_msg[0] == ':')
+            {
+                std::cout << "priv msg = " << prv_msg << std::endl;
                 prv_msg = prv_msg.substr(1);
+                std::cout << "apres priv msg = " << prv_msg << std::endl;
+
+            }
         } 
         else
             prv_msg.clear();
@@ -242,8 +254,7 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
         Channel *channel = CHANNEL_Exist(destination);
         if (!channel)
             return ERR(client, 403, destination, "No such channel");
-        msg = ":" + client->get_nick() + "!" + client->get_username() + "@" + "localhost";
-        msg += " PRIVMSG " + destination + " " + prv_msg;
+        msg = ":" + client->get_Prefix() + " PRIVMSG " + destination + " :" + prv_msg;
         channel->SEND_Msg(msg, client);
     }
     else
@@ -253,7 +264,7 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
         Client *target_client = FINDING_Client_str(destination);
         if (!target_client)
             return ERR(client, 401, destination, "No such nick/channel");
-        msg = ":" + client->get_Prefix() + " PRIVMSG " + target_client->get_nick() + " :" + prv_msg;
+        msg = ":" + client->get_Prefix() + " PRIVMSG " + destination + " :" + prv_msg;
         target_client->Send_message(msg);
     }
 }

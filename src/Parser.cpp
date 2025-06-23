@@ -60,7 +60,7 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 	else if (cmd == "NICK")
 		return serv->NICK(client, argument);
 	else if (cmd == "USER")
-		return serv->USER(client, argument);
+		return serv->USER(client, argument, msg);
 	else if (cmd == "QUIT")
 		return serv->QUIT(client, msg);
 	else if (cmd == "PING")
@@ -74,7 +74,7 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 			ERR(client, 451, client->get_nick(), "You have not registered");
 		return;
 	}
-	
+
 	if (cmd == "JOIN")
 		serv->JOIN(client, argument);
 	else if (cmd == "PRIVMSG")
