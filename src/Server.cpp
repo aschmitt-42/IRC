@@ -16,7 +16,11 @@ Server::Server(std::string port, std::string password)
 }
 
 Server::~Server() 
-{ 
+{
+    for (size_t i = 0; i < _disconect_client.size(); i++)
+    {
+        delete _disconect_client[i];
+    }
     for (size_t i = 0; i < _clients.size(); i++)
     {
         delete _clients[i];
@@ -33,6 +37,7 @@ Server::~Server()
 void Server::disconect_client(Client *client)
 {
     std::cout << "Client " << client->get_nick() << " Quitted IRC, Farawell..." << std::endl;
+    
     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
         if (it->fd == client->get_clientfd()) {
             _poll_fds.erase(it);
@@ -41,14 +46,16 @@ void Server::disconect_client(Client *client)
     }
 
     for (std::size_t i = 0; i < _clients.size(); i++){
-        if (_clients[i]->get_clientfd() == client->get_clientfd())
+        if (_clients[i]->get_nick() == client->get_nick())
         {
             _clients.erase(_clients.begin() + i);
             break;
         }
     }
+
     close(client->get_clientfd());
-    delete client;
+
+    _disconect_client.push_back(client);
 }
 
 
@@ -85,7 +92,6 @@ void Server::read_data_from_socket(Client *client)
         return;
     }
 
-
     char buffer[1024];
     
     int bytes_read = recv(client->get_clientfd(), buffer, sizeof(buffer) - 1, 0);
@@ -93,7 +99,6 @@ void Server::read_data_from_socket(Client *client)
         this->disconect_client(client);
         return ;
     }
-    
     buffer[bytes_read] = 0;
 
     std::string& msg = client->get_message();
@@ -174,6 +179,7 @@ void	Server::start()
             }
         }
     }
+
 }
 
 void signal_handler(int signum) 

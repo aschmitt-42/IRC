@@ -32,6 +32,7 @@ class Server
 		std::string				_password;
 		std::vector<pollfd>		_poll_fds;		// Tableau des descripteur
 		std::vector<Client*>	_clients;		// Tableau des clients
+		std::vector<Client*>	_disconect_client;		// Tableau des clients
 		std::vector<Channel*>	_channels;		// Tableau des channels existant
 
 		void read_data_from_socket(Client *client);
@@ -73,7 +74,6 @@ class Server
 
 		int 	NICK_Already_Exist(std::string nickname);
 		Channel	*CHANNEL_Exist(std::string channel_name);
-		void 	SEND_Quit_Msg(Client *client, std::string msg);
 };
 
 int create_server_socket(int port);

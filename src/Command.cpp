@@ -73,7 +73,7 @@ void Server::USER(Client *client, std::vector<std::string>argument)
 void Server::QUIT(Client *client, std::string msg)
 {
     std::cout << "QUIT DETECTED :" << std::endl;
-    
+
     size_t tmp = msg.find(':');
     if (tmp != std::string::npos)
         msg = msg.substr(tmp + 1);
@@ -83,8 +83,6 @@ void Server::QUIT(Client *client, std::string msg)
     client->SEND_Quit_Msg(msg); // send message to all clients who are in a channel with the client
     
     disconect_client(client);   // remove client from server 
-
-    // delete client;              // delete it
 }
 
 
