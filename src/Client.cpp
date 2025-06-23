@@ -66,12 +66,12 @@ int	Client::REGISTRED()
 	return 0;
 }
 
-void	Client::SET_Username(std::vector<std::string> argument)
+void	Client::SET_Username(std::vector<std::string> argument, std::string msg)
 {
 	_username = argument[0];
 	_mode = std::atoi(argument[1].c_str());
 	_hostname = "localhost";
-	_realname = argument[3];
+	_realname = msg;
 }
 
 void	Client::Join_Channel(Channel *channel)

@@ -59,13 +59,13 @@ class Server
 		void QUIT(Client *client, std::string msg);
 		void PASS(Client *client, std::vector<std::string>argument);
 		void NICK(Client *client, std::vector<std::string>argument);
-		void USER(Client *client, std::vector<std::string>argument);
 		void PING(Client *client, std::vector<std::string>argument);
 		void PONG(Client *client, std::vector<std::string>argument);
 		void JOIN(Client *client, std::vector<std::string>argument);
 		void MODE(Client *client, std::vector<std::string>argument);
 		void TOPIC(Client *client, std::vector<std::string>argument);
 		void INVITE(Client *client, std::vector<std::string>argument);
+		void USER(Client *client, std::vector<std::string>argument, std::string msg);
 		void PART(Client *client, std::vector<std::string>argument, std::string msg);
 		void KICK(Client *client, std::vector<std::string> argument, std::string msg);
 		void PRIVMSG(Client *client, std::vector<std::string> argument, std::string prv_msg);
