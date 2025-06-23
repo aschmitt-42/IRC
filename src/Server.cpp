@@ -29,8 +29,6 @@ Server::~Server()
     {
         delete _channels[i];
     }
-    
-    //std::cout << "Destructor Server called" << std::endl; 
 }
 
 
@@ -188,14 +186,6 @@ void signal_handler(int signum)
     std::cout << "\n[INFO] SIGNAL : " << signum << " RECEIVED\n";
     running = false;
 }
-
-
-// if (it->revents & POLLERR) {
-//     std::cerr << "[Server] Error on fd: " << it->fd << std::endl;
-//     close(it->fd);
-//     (&_poll_fds, it - _poll_fds.begin(), &_poll_fds.size());
-//     continue;
-// }
 
 
 

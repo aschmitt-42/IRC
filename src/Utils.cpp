@@ -11,7 +11,6 @@ int     IS_Client_In_Vector(std::vector<Client*> client_vector, Client *client)
     return 0;
 }
 
-//faire en sorte que le parser remplissent les argument de modchange un par un pour gerer les cas ou ils y auraient plusieurs arg pour un mod
 std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argument) 
 {
     std::cout << "MODE PARSER DETECTED" << std::endl;
@@ -56,23 +55,22 @@ std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argu
             result.push_back(modeChange);
         }
     }
-    //printmod(result);
     return result;
 }
 
 
-void    printmod(std::vector<ModChange> result)
-{
-    for (size_t i = 0; i < result.size(); ++i)
-    {
-        std::cout << "================== Mod" << i << " ==================" << std::endl;
-        std::cout << "mod : " << result[i].mode << std::endl << "add : " << result[i].add <<  std::endl;
-        std::cout << "Arguments :" << std::endl;
-        for (size_t j = 0; j < result[i].argument.size(); ++j)
-            std::cout << result[i].argument[j] << " | ";
-    }
-    std::cout << "\n========================================\n" << std::endl;
-}
+// void    printmod(std::vector<ModChange> result)
+// {
+//     for (size_t i = 0; i < result.size(); ++i)
+//     {
+//         std::cout << "================== Mod" << i << " ==================" << std::endl;
+//         std::cout << "mod : " << result[i].mode << std::endl << "add : " << result[i].add <<  std::endl;
+//         std::cout << "Arguments :" << std::endl;
+//         for (size_t j = 0; j < result[i].argument.size(); ++j)
+//             std::cout << result[i].argument[j] << " | ";
+//     }
+//     std::cout << "\n========================================\n" << std::endl;
+// }
 
 Channel *Server::CHANNEL_Exist(std::string channel_name)
 {
@@ -102,7 +100,6 @@ std::vector<std::string> split(const std::string input, char delimiter)
 
     while (std::getline(ss, token, delimiter)) 
     {
-        // Supprimer les espaces éventuels autour du token
         token.erase(std::remove(token.begin(), token.end(), ' '), token.end());
         if (!token.empty()) {
             result.push_back(token);
@@ -114,7 +111,6 @@ std::vector<std::string> split(const std::string input, char delimiter)
 
 int create_server_socket(int port) {
 
-    // Création de la socket
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0); // SOCK_STREAM = TCP
     if (socket_fd == -1) {
         std::cerr << "[Server] Socket error: " << strerror(errno) << std::endl;

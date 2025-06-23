@@ -66,7 +66,7 @@ void	Channel::Send_Msg_To_All_Client(std::string msg)
 	
 }
 
-std::string	Channel::ClientList() // rajouter @ pour operateur
+std::string	Channel::ClientList()
 {
 	std::string client_list;
 
@@ -92,14 +92,14 @@ int Channel::Try_Join(Client *client, std::string key)
 	{
 		for (std::vector<Client*>::iterator it = _invite.begin(); it != _invite.end(); ++it) 
 		{
-			if ((*it)->get_nick() == client->get_nick()) //client dans la liste d'invitation
+			if ((*it)->get_nick() == client->get_nick()) //client is invited
 				return 0;
 		}
-		// fin de boucle client n'y est pas erreur pour rejoindre
+
 		ERR(client, 473, _name, "Cannot join channel (+i)");
 		return 1;
 	}
-	if (_password != "" && key != _password) // mode 'password' et mauvais mot de passe alors erreur pour rejoindre
+	if (_password != "" && key != _password)
 	{
 		ERR(client, 475, _name, "Cannot join channel (+k)");
 		return 1;
@@ -119,10 +119,9 @@ int	Channel::Client_in_Channel(std::string client_name)
 
 int	Channel::Try_Invite(Client *client, Client *new_client)
 {
-	if (_invite_only && !this->Is_Operator(client)) // mode 'invite_only' et client pas operateur alors erreur pour inviter quelqu'un
+	if (_invite_only && !this->Is_Operator(client))
 		return 1;
 	
-	// PAS DE PROBLEME POUR INVITER
 	_invite.push_back(new_client);
 
 	return 0;
@@ -196,7 +195,7 @@ void Channel::CHANGE_Pass(Client *client, bool add, std::vector<std::string> arg
 {
 	std::string msg = ":" + client->get_Prefix() + " MODE " + _name + " " + (add ? "+" : "-") + "k";
 	
-	if (add)//faut il verifier quil y ait un mdp ou meme un mot de passe vide fonctionne
+	if (add) //faut il verifier quil y ait un mdp ou meme un mot de passe vide fonctionne
 	{
 		_password = argument[0];
 		msg += " " + _password;

@@ -78,8 +78,7 @@ void	Client::Join_Channel(Channel *channel)
 
 std::string	Client::get_Prefix() const
 {
-	std::string s = _nickname + "!" + _username + "@" + _hostname;
-	return s;
+	return (_nickname + "!" + _username + "@" + _hostname);
 }
 
 void Client::Leave_Channel(Channel *channel)

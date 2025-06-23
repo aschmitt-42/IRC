@@ -34,7 +34,6 @@ std::vector<std::string> ARG_Finder(std::string msg)
 	while (ss >> word) 
 	{
         words.push_back(word);
-		// std::cout << word << std::endl;
     }
 	return words;
 }
@@ -46,7 +45,7 @@ void IRC_Parser(std::string msg, Server *serv, Client *client)
 	std::cout << msg << std::endl;
 
 	std::string cmd = CMD_Finder(msg);
-	if (cmd.empty()) // && client->_registred_user
+	if (cmd.empty())
 	{
 		std::cout << "CMD EMPTY" << std::endl;
 		return;
