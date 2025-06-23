@@ -2,24 +2,23 @@
 # define CLIENT_HPP
 
 # include <iostream>
-# include <fstream>
-# include <string>
-# include <arpa/inet.h>
-# include <netdb.h>
-# include <stdio.h>
-# include <string.h>
-# include <unistd.h>
-# include <sys/socket.h> 
-# include <fcntl.h>
-# include <errno.h>
 # include <stdlib.h>
-# include <sys/select.h>
-# include <sys/types.h>
-# include <poll.h>
 # include <sys/poll.h>
 # include <sys/socket.h>
 # include <vector>
 # include "Channel.hpp"
+// # include <fstream>
+// # include <string>
+// # include <arpa/inet.h>
+// # include <netdb.h>
+// # include <stdio.h>
+// # include <string.h>
+// # include <unistd.h>
+// # include <sys/socket.h> 
+// # include <fcntl.h>
+// # include <sys/select.h>
+// # include <sys/types.h>
+// # include <poll.h>
 
 class Client
 {
@@ -49,6 +48,7 @@ class Client
 
 		void	SEND_Quit_Msg(std::string msg);
 		void	SET_Username(std::vector<std::string> argument, std::string msg);
+		void 	Leave_Channel(Channel *channel);
 		
 		//GETTER
 		int				get_clientfd()	{return _client_fd;}
@@ -59,6 +59,7 @@ class Client
 		std::string		get_username()	{return _username;}
 		std::string		get_realname()	{return _realname;}
 		std::string 	get_Prefix() const;
+
 
 		//SETTER
 		void			SET_Nick(std::string nick){_nickname = nick;}

@@ -95,7 +95,7 @@ void Server::read_data_from_socket(Client *client)
     char buffer[1024];
     
     int bytes_read = recv(client->get_clientfd(), buffer, sizeof(buffer) - 1, 0);
-    if (bytes_read <= 0) { // && errno != EWOULDBLOCK
+    if (bytes_read <= 0) { 
         this->disconect_client(client);
         return ;
     }

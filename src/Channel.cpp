@@ -33,10 +33,16 @@ void	Channel::DELETE_User(Client *client)
 {
 	for (size_t	i = 0; i < _client.size(); ++i)
 	{
-		if (_client[i] == client)
+		if (_client[i]->get_nick() == client->get_nick())
 		{
 			_client.erase(_client.begin() + i);
-			// client->DELETE_Channel();
+		}
+	}
+	for (size_t	i = 0; i < _operator.size(); ++i)
+	{
+		if (_operator[i]->get_nick() == client->get_nick())
+		{
+			_operator.erase(_operator.begin() + i);
 		}
 	}
 }

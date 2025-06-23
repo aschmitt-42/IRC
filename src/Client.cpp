@@ -49,9 +49,6 @@ void Client::SEND_Quit_Msg(std::string msg)
 void Client::Send_message(std::string msg)
 {
 	msg += "\r\n";
-	// std::cout << "--------SEND_MSG--------" << std::endl;
-	// std::cout <<  msg << std::endl;
-	// std::cout << "------------------------" << std::endl;
 
 	if (send(_client_fd, msg.c_str(), msg.size(), 0) == -1)
 	{
@@ -85,3 +82,14 @@ std::string	Client::get_Prefix() const
 	return s;
 }
 
+void Client::Leave_Channel(Channel *channel)
+{
+	for (size_t i = 0; i < _channels.size(); ++i)
+	{
+		if (_channels[i]->GET_Name() == channel->GET_Name())
+		{
+			_channels.erase(_channels.begin() + i);
+			break;
+		}
+	}
+}

@@ -166,7 +166,7 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
 
         // SEND NAMES / @ for secret channels / * for private channels / = for others (public channels).
         //              ou alors @ pour l'operateur
-        msg = ":localhost 353 " + client->get_nick() + " = " + channel_name + " :@" + channel->ClientList();
+        msg = ":localhost 353 " + client->get_nick() + " = " + channel_name + " :" + channel->ClientList();
         client->Send_message(msg);
 
         // SEND END OF NAMES
@@ -401,7 +401,7 @@ void Server::TOPIC(Client *client, std::vector<std::string> argument, std::strin
         msg = new_topic.substr(tmp + 1);
     else
         msg = " ";
-    channel->SET_Topic(msg); // SET TOPIC mais seulement avec le 1er elements et non toute la phrase
+    channel->SET_Topic(msg);
 
     msg = ":" + client->get_Prefix() + " TOPIC " + channel_name + " :" + channel->GET_Topic(); // pas sur du msg, client ne recois rien comme quoi topic a ete change
     channel->Send_Msg_To_All_Client(msg);
@@ -410,8 +410,6 @@ void Server::TOPIC(Client *client, std::vector<std::string> argument, std::strin
 void Server::KICK(Client *client, std::vector<std::string> arguments, std::string msg)
 {
     std::cout << "KICK DETECTED" << std::endl;
-    
-    std::cout << "avant :" << msg << std::endl;
 
     size_t tmp = msg.find(':');
     if (tmp != std::string::npos)
@@ -422,8 +420,6 @@ void Server::KICK(Client *client, std::vector<std::string> arguments, std::strin
     }
     else
         msg.clear();
-
-    std::cout << "APRES " << msg << std::endl;
 
     if (arguments.size() < 2)
         return ERR(client, 461, "Kick", "Not enough parameters");
@@ -446,6 +442,7 @@ void Server::KICK(Client *client, std::vector<std::string> arguments, std::strin
     
     channel->Send_Msg_To_All_Client(":" + client->get_Prefix() + " KICK " + channel->GET_Name() + " " + arguments[1] + " :" + msg);
     channel->DELETE_User(FINDING_Client_str(arguments[1]));
+    client->Leave_Channel(channel); // Enleve le channel du client
     //channel->Send_Msg_To_All_Client(": " + client->get_Prefix() + " KICK " + channel->GET_Name() + " " + arguments[1] + " :" + msg);
     //channel->SEND_Msg_to_everyone("Kick " + arguments[1] + " From " + channel_name + " using " + msg + " as the reason.", client);
 }
@@ -459,7 +456,7 @@ void Server::PART(Client *client, std::vector<std::string>argument, std::string 
     
     Channel     *channel;
     std::string channel_name;
-    std::vector<std::string> Names = split(argument[0], ',');
+    std::vector<std::string> Channels_Names = split(argument[0], ',');
     std::string keys;
 
     size_t tmp = message.find(':');
@@ -475,9 +472,9 @@ void Server::PART(Client *client, std::vector<std::string>argument, std::string 
     std::cout << "keys : " << keys << std::endl;
     
 
-    for (size_t i = 0; i < Names.size(); ++i)
+    for (size_t i = 0; i < Channels_Names.size(); ++i)
     {
-        channel_name = Names[i];
+        channel_name = Channels_Names[i];
         channel = CHANNEL_Exist(channel_name);
         if (!channel)
             return ERR(client, 403, channel_name, "No such channel");
@@ -488,6 +485,8 @@ void Server::PART(Client *client, std::vector<std::string>argument, std::string 
         channel->DELETE_User(client);
     }
 
+    client->Leave_Channel(channel); // Enleve le channel du client
+    
     if (channel->GET_Nb_User() == 0) // Si le channel est vide on le supprime
     {
         for (size_t i = 0; i < _channels.size(); ++i)
@@ -500,4 +499,5 @@ void Server::PART(Client *client, std::vector<std::string>argument, std::string 
             }
         }
     }
+
 }
