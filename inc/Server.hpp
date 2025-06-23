@@ -32,6 +32,7 @@ class Server
 		std::string				_password;
 		std::vector<pollfd>		_poll_fds;		// Tableau des descripteur
 		std::vector<Client*>	_clients;		// Tableau des clients
+		std::vector<Client*>	_disconect_client;		// Tableau des clients
 		std::vector<Channel*>	_channels;		// Tableau des channels existant
 
 		void read_data_from_socket(Client *client);
@@ -55,24 +56,24 @@ class Server
 
 		//command
 		
-		void PASS(Client *client, std::vector<std::string> argument);
+		void QUIT(Client *client, std::string msg);
+		void PASS(Client *client, std::vector<std::string>argument);
 		void NICK(Client *client, std::vector<std::string>argument);
 		void USER(Client *client, std::vector<std::string>argument);
 		void PING(Client *client, std::vector<std::string>argument);
 		void PONG(Client *client, std::vector<std::string>argument);
-		void QUIT(Client *client, std::string msg);
-		void JOIN(Client *user, std::vector<std::string> argument);
+		void JOIN(Client *client, std::vector<std::string>argument);
+		void MODE(Client *client, std::vector<std::string>argument);
+		void TOPIC(Client *client, std::vector<std::string>argument);
+		void INVITE(Client *client, std::vector<std::string>argument);
+		void PART(Client *client, std::vector<std::string>argument, std::string msg);
 		void KICK(Client *client, std::vector<std::string> argument, std::string msg);
-		void INVITE(Client *client, std::vector<std::string> argument);
-		void TOPIC(Client *client, std::vector<std::string> argument);
-		void MODE(Client *client, std::vector<std::string> argument);
 		void PRIVMSG(Client *client, std::vector<std::string> argument, std::string prv_msg);
 
 		void MessageRegister(Client *client);
 
 		int 	NICK_Already_Exist(std::string nickname);
 		Channel	*CHANNEL_Exist(std::string channel_name);
-		void 	SEND_Quit_Msg(Client *client, std::string msg);
 };
 
 int create_server_socket(int port);

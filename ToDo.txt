@@ -6,12 +6,11 @@
 
 [ ] TOPIC 
     - [ ] recupere le topic en entier 
+    - [ ] message de 1er topic 
     - [ ] message de changement de topic
      
 [ ] Msg de hexchat
     - [ ] CAP LS 302
-
-[ ] QUIT A tester
 
 [ ] KICK
     - [ ] A faire
@@ -19,22 +18,29 @@
 [ ] User a finir
     - [ ] Recuperer realname au complet
 
-[ ] Join TEST
-    -[ ] join avec des cles en creant le channels
-    -[ ] join avec des cles un channel deja existant
 
+
+[ ] PART A FINIR
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////                                                     TEST                                                                                   ///////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
 
--------------IRC_PARSER-------------
-MODE #test +l nick2
+maybe void Client::SEND_Quit_Msg(std::string msg) SEGFAULT
+
+erreur valgrind sur read data from socket, cela viens surrement lorsqu'un client quitte le server
+
+QUIT :bye la team
 ------------------------------------
 
-MODE DETECTED
-MODE PARSER DETECTED
-ERR DETECTED ID:461
-END OF MODE PARSER
+QUIT DETECTED :
+msg : QUIT :bye la team
+Client nick2 Quitted IRC, Farawell...
 
+-------------IRC_PARSER-------------
+PING LAG1750621845409
+------------------------------------
+
+PING DETECTED
+[1]    16887 segmentation fault (core dumped)  ./ircserv 4242 jean

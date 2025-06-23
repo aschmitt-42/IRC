@@ -16,7 +16,11 @@ Server::Server(std::string port, std::string password)
 }
 
 Server::~Server() 
-{ 
+{
+    for (size_t i = 0; i < _disconect_client.size(); i++)
+    {
+        delete _disconect_client[i];
+    }
     for (size_t i = 0; i < _clients.size(); i++)
     {
         delete _clients[i];
@@ -33,21 +37,25 @@ Server::~Server()
 void Server::disconect_client(Client *client)
 {
     std::cout << "Client " << client->get_nick() << " Quitted IRC, Farawell..." << std::endl;
+    
     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it) {
         if (it->fd == client->get_clientfd()) {
             _poll_fds.erase(it);
             break;
         }
     }
+
     for (std::size_t i = 0; i < _clients.size(); i++){
-        if (_clients[i]->get_clientfd() == client->get_clientfd())
+        if (_clients[i]->get_nick() == client->get_nick())
         {
-            // maybe close de fd
-            close(client->get_clientfd());
             _clients.erase(_clients.begin() + i);
             break;
         }
     }
+
+    close(client->get_clientfd());
+
+    _disconect_client.push_back(client);
 }
 
 
@@ -78,21 +86,19 @@ void Server::accept_new_connection()
 
 void Server::read_data_from_socket(Client *client)
 {
+    if (std::find(_clients.begin(), _clients.end(), client) == _clients.end()) 
+    {
+        std::cerr << "[Server] Attempted to read from a disconnected client" << std::endl;
+        return;
+    }
+
     char buffer[1024];
     
     int bytes_read = recv(client->get_clientfd(), buffer, sizeof(buffer) - 1, 0);
-    if (bytes_read < 0) { // && errno != EWOULDBLOCK
-        std::cerr << "[Server] Recv error: " << strerror(errno) << std::endl;
+    if (bytes_read <= 0) { // && errno != EWOULDBLOCK
         this->disconect_client(client);
         return ;
     }
-
-    if (bytes_read == 0){
-        std::cout << "[Server] " << client->get_nick() << ", client fd " << client->get_clientfd() << " disconnected" << std::endl;
-        this->disconect_client(client);
-        return ;
-    }
-    
     buffer[bytes_read] = 0;
 
     std::string& msg = client->get_message();
@@ -174,6 +180,7 @@ void	Server::start()
             }
         }
     }
+
 }
 
 void signal_handler(int signum) 

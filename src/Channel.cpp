@@ -44,8 +44,6 @@ void	Channel::DELETE_User(Client *client)
 
 void	Channel::SEND_Msg(std::string msg, Client *client)
 {
-	std::cout << "SEND_MSG TO CHANNEL " << msg << std::endl;
-
 	for (size_t	i = 0; i < _client.size(); ++i)
 	{
 		if (_client[i]->get_nick() != client->get_nick())
@@ -210,7 +208,7 @@ void Channel::CHANGE_Operator(Client *client, Server *serv, bool add, std::vecto
 	for (size_t i = 0; i < argument.size(); ++i)
 		std::cout << argument[i] << std::endl;
 	if (!Is_Operator(client))
-		return ERR(client, 482, _name, "You're not channel operator");
+		return ERR(client, 482, client->get_nick() + " " + _name, "You're not channel operator");
 	Client *target_client = serv->FINDING_Client_str(argument[0]);
     if (!target_client)
         return ERR(client, 401, argument[0], "No such nick/channel");

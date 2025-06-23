@@ -11,27 +11,27 @@ int     IS_Client_In_Vector(std::vector<Client*> client_vector, Client *client)
     return 0;
 }
 
-void Server::SEND_Quit_Msg(Client *client, std::string msg)
-{
-    std::vector<Client*> sended_client;
-    std::vector<Client*> temp;
+// void Server::SEND_Quit_Msg(Client *client, std::string msg)
+// {
+//     std::vector<Client*> sended_client;
+//     std::vector<Client*> temp;
 
-    for (size_t i = 0; i < _channels.size(); ++i)
-    {
-        if (_channels[i]->Client_in_Channel(client->get_nick()))
-        {
-            temp = _channels[i]->GET_Clients_Vector();
-            for (size_t j = 0; j < temp.size(); ++j)
-            {
-                if (!IS_Client_In_Vector(sended_client, temp[j]) && client != temp[i])
-                {
-                    temp[j]->Send_message(":" + client->get_nick() + "!" + client->get_username() + "@localhost" + + " QUIT " + msg);
-                    sended_client.push_back(temp[j]);
-                }
-            }
-        }
-    }
-}
+//     for (size_t i = 0; i < _channels.size(); ++i)
+//     {
+//         if (_channels[i]->Client_in_Channel(client->get_nick()))
+//         {
+//             temp = _channels[i]->GET_Clients_Vector();
+//             for (size_t j = 0; j < temp.size(); ++j)
+//             {
+//                 if (!IS_Client_In_Vector(sended_client, temp[i]) && client != temp[i])
+//                 {
+//                     temp[i]->Send_message(":" + client->get_nick() + "!" + client->get_username() + "@localhost" + + " QUIT " + msg);
+//                     sended_client.push_back(temp[i]);
+//                 }
+//             }
+//         }
+//     }
+// }
 
 //faire en sorte que le parser remplissent les argument de modchange un par un pour gerer les cas ou ils y auraient plusieurs arg pour un mod
 std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argument) 
