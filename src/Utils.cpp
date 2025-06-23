@@ -23,10 +23,10 @@ void Server::SEND_Quit_Msg(Client *client, std::string msg)
             temp = _channels[i]->GET_Clients_Vector();
             for (size_t j = 0; j < temp.size(); ++j)
             {
-                if (!IS_Client_In_Vector(sended_client, temp[i]) && client != temp[i])
+                if (!IS_Client_In_Vector(sended_client, temp[j]) && client != temp[i])
                 {
-                    temp[i]->Send_message(":" + client->get_nick() + "!" + client->get_username() + "@localhost" + + " QUIT " + msg);
-                    sended_client.push_back(temp[i]);
+                    temp[j]->Send_message(":" + client->get_nick() + "!" + client->get_username() + "@localhost" + + " QUIT " + msg);
+                    sended_client.push_back(temp[j]);
                 }
             }
         }
