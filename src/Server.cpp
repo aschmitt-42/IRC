@@ -112,6 +112,7 @@ void Server::read_data_from_socket(Client *client)
         
         IRC_Parser(cmd, this, client);
         msg.erase(0, position + 1);
+	    std::cout << "------------------------------------\n" << std::endl;
     }
 }
 

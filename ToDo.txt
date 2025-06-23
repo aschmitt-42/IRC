@@ -19,13 +19,10 @@
 [ ] User a finir
     - [ ] Recuperer realname au complet
 
-
 [ ] Join TEST
     -[ ] join avec des cles en creant le channels
     -[ ] join avec des cles un channel deja existant
 
-[ ] QUIT 
-    -[ ] client utilise commande QUIT tout les clients connecter au channel ne recoive pas le messasge qu'il quit
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////                                                     TEST                                                                                   ///////
