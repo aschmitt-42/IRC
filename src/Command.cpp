@@ -290,12 +290,12 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
 
     
     // REPLY TO THE CLIENT WHO SENT THE INVITE
-    std::string msg = ":localhost 341" + client->get_nick() + " " + new_client_name + " :" + channel_name;
+    std::string msg = ":localhost 341 " + client->get_nick() + " " + new_client_name + " :" + channel_name;
     client->Send_message(msg);
 
 
     // INVITE MESSAGE TO THE NEW CLIENT
-    msg = ":" + client->get_Prefix() + " INVITE " + new_client_name + " " + channel_name;
+    msg = ":" + client->get_Prefix() + " INVITE " + new_client_name + " :" + channel_name;
     new_client->Send_message(msg);
 
 }

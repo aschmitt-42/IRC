@@ -143,12 +143,15 @@ void	Server::start()
     _poll_fds.push_back(server_fd);
     while (running) 
     {    
-        int status = poll(_poll_fds.begin().base(), _poll_fds.size(), -1);
+        int status = poll(_poll_fds.begin().base(), _poll_fds.size(), 5000);
         
         if (status == -1) {
-            std::cerr << "[Server] Poll error: " << strerror(errno) << std::endl;
             std::cout << "Server Stopper, Bye !!!" << std::endl;
             return;
+        }
+        else if (status == 0) {
+            std::cout << "No activity, waiting..." << std::endl;
+            continue;
         }
         
         Client *client;
