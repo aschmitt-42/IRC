@@ -8,6 +8,7 @@
 # include <sstream>
 # include <algorithm>
 # include <csignal>
+# include <fcntl.h>
 // # include "Channel.hpp"
 // # include <iostream>
 // # include <fstream>
@@ -16,7 +17,6 @@
 // # include <stdio.h>
 // # include <unistd.h>
 // # include <sys/socket.h> 
-// # include <fcntl.h>
 // # include <stdlib.h>
 // # include <sys/select.h>
 // # include <sys/types.h>

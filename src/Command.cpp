@@ -227,21 +227,16 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
         {
             prv_msg = prv_msg.substr(second_space + 1);
             if (prv_msg[0] == ':')
-            {
-                std::cout << "priv msg = " << prv_msg << std::endl;
                 prv_msg = prv_msg.substr(1);
-                std::cout << "apres priv msg = " << prv_msg << std::endl;
-
-            }
-        } 
+        }
         else
             prv_msg.clear();
     } 
     else
         prv_msg.clear();
 
-    // if (prv_msg.empty())
-    //     return ERR(client, 412, destination, "No text to send");
+    if (prv_msg.empty())
+        return ERR(client, 412, destination, "No text to send");
 
     if (destination[0] == '#' || destination[0] == '&')
     {

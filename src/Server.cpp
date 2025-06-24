@@ -84,13 +84,7 @@ void Server::accept_new_connection()
 
 void Server::read_data_from_socket(Client *client)
 {
-    if (std::find(_clients.begin(), _clients.end(), client) == _clients.end()) 
-    {
-        std::cerr << "[Server] Attempted to read from a disconnected client" << std::endl;
-        return;
-    }
-
-    char buffer[1024];
+    char buffer[513]; // 512 max
     
     int bytes_read = recv(client->get_clientfd(), buffer, sizeof(buffer) - 1, 0);
     if (bytes_read <= 0) { 
