@@ -2,7 +2,6 @@
 
 void Server::PASS(Client *client, std::vector<std::string> argument)
 {
-    std::cout << "PASS DETECTED" << std::endl;
     if (argument.size() != 1)
         return ERR(client, 461, "PASS", "Not enough parameters");
     if (client->_registred_password == 1)
@@ -24,8 +23,7 @@ void Server::PASS(Client *client, std::vector<std::string> argument)
 
 void Server::NICK(Client *client, std::vector<std::string>argument)
 {
-    std::cout << "NICK DETECTED" << std::endl;
-    
+
     if (argument.size() < 1)
         return ERR(client, 431, "", "No nickname given");
 
@@ -53,8 +51,6 @@ void Server::NICK(Client *client, std::vector<std::string>argument)
 
 void Server::USER(Client *client, std::vector<std::string>argument, std::string msg)
 {
-    std::cout << "USER DETECTED" << std::endl;
-    
     if (argument.size() < 4)
         return ERR(client, 461, "USER", "Not enough parameters");
     
@@ -79,7 +75,6 @@ void Server::USER(Client *client, std::vector<std::string>argument, std::string 
 
 void Server::QUIT(Client *client, std::string msg)
 {
-    std::cout << "QUIT DETECTED :" << std::endl;
 
     size_t tmp = msg.find(':');
     if (tmp != std::string::npos)
@@ -95,7 +90,6 @@ void Server::QUIT(Client *client, std::string msg)
 
 void Server::JOIN(Client *client, std::vector<std::string> argument)
 {
-    std::cout << "JOIN DETECTED" << std::endl;
 
     if (argument.size() < 1)
         return ERR(client, 461, "JOIN", "Not enough parameters");
@@ -141,7 +135,6 @@ void Server::JOIN(Client *client, std::vector<std::string> argument)
         if (!channel)
         {
             channel = new Channel(channel_name, "", client, this);
-            // channel->SET_Owner(client);
             _channels.push_back(channel);
         }
         else if (channel->Try_Join(client, key))
@@ -200,7 +193,6 @@ void Server::MessageRegister(Client *client)
 
 void Server::PING(Client *client, std::vector<std::string> argument)
 {
-    std::cout << "PING DETECTED" << std::endl;
     std::string msg;
 
     if (argument.size() < 1)
@@ -240,7 +232,6 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
 
     if (destination[0] == '#' || destination[0] == '&')
     {
-        std::cout << "PRIVMSG TO CHANNEL "<< std::endl;
 
         Channel *channel = CHANNEL_Exist(destination);
         if (!channel)
@@ -250,7 +241,6 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
     }
     else
     {
-        std::cout << "PRIVMSG DIRECT TO ANOTHER CLIENT "<< std::endl;
         
         Client *target_client = FINDING_Client_str(destination);
         if (!target_client)
@@ -263,7 +253,6 @@ void Server::PRIVMSG(Client *client, std::vector<std::string> argument, std::str
 
 void Server::INVITE(Client *client, std::vector<std::string> argument)
 {
-    std::cout << "INVITE DETECTED" << std::endl;
 
     if (argument.size() < 2)
         return ERR(client, 461, "INVITE", "Not enough parameters");
@@ -302,8 +291,6 @@ void Server::INVITE(Client *client, std::vector<std::string> argument)
 
 void Server::MODE(Client *client, std::vector<std::string> argument)
 {
-    std::cout << "MODE DETECTED" << std::endl;
-
     if (argument.size() < 1)
         return ERR(client, 461, "MODE", "Not enough parameters");
     
@@ -319,7 +306,6 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
 
     if (argument.size() == 1)
     {
-        std::cout << "MODE WITHOUT PARAMETER" << std::endl;
 
         msg = ":localhost 324 " + client->get_nick() + " " + channel_name + " :";
         msg += channel->GET_Mode_List();
@@ -331,8 +317,6 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
         return ERR(client, 482, client->get_nick() + " " + channel_name, "You're not channel operator");
     
     std::vector<ModChange> result = MODE_Parser(client, argument);
-    std::cout << "END OF MODE PARSER " << std::endl;
-
     for (size_t i = 0; i < result.size(); ++i)
     {
         if (result[i].mode == 'i')
@@ -345,15 +329,11 @@ void Server::MODE(Client *client, std::vector<std::string> argument)
             channel->CHANGE_Operator(client, this, result[i].add, result[i].argument);
         else if (result[i].mode == 'l')
             channel->USER_Limit(client, result[i].add, result[i].argument);
-        else
-            std::cout << "WRONG MODE, ERROR : " << result[i].mode << std::endl;
     }
 }
 
 void Server::TOPIC(Client *client, std::vector<std::string> argument, std::string new_topic)
 {
-    std::cout << "TOPIC DETECTED" << std::endl;
-
     if (argument.size() < 1)
         return ERR(client, 461, "TOPIC", "Not enough parameters");
 
@@ -400,8 +380,6 @@ void Server::TOPIC(Client *client, std::vector<std::string> argument, std::strin
 
 void Server::KICK(Client *client, std::vector<std::string> arguments, std::string msg)
 {
-    std::cout << "KICK DETECTED" << std::endl;
-
     size_t tmp = msg.find(':');
     if (tmp != std::string::npos)
     {
@@ -438,7 +416,6 @@ void Server::KICK(Client *client, std::vector<std::string> arguments, std::strin
 
 void Server::PART(Client *client, std::vector<std::string>argument, std::string message)
 {
-    std::cout << "PART DETECTED" << std::endl;
 
     if (argument.size() < 1)
         return ERR(client, 461, "PART", "Not enough parameters");

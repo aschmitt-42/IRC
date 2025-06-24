@@ -41,13 +41,9 @@ std::vector<std::string> ARG_Finder(std::string msg)
 
 void IRC_Parser(std::string msg, Server *serv, Client *client)
 {
-	std::cout << "\n-------------IRC_PARSER-------------" << std::endl;
-	std::cout << msg << std::endl;
-
 	std::string cmd = CMD_Finder(msg);
 	if (cmd.empty())
 	{
-		std::cout << "CMD EMPTY" << std::endl;
 		return;
 	}
 

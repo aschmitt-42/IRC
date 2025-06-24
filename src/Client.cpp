@@ -18,7 +18,6 @@ Client::Client(pollfd client_poll, int client_fd)
 
 Client::~Client()
 {
-	// std::cout << "Destructor called on " << _nickname << std::endl;
 }
 
 void Client::SEND_Quit_Msg(std::string msg)

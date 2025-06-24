@@ -8,7 +8,7 @@ Channel::Channel(std::string channel_name, std::string topic_name, Client *clien
 	_topic = topic_name;
 	_topic_restriction = false;
 	_password = "";
-	_invite_only = false;
+	_invite_only = true;
 	_nb_max_user = 0;
 	_operator.push_back(client);
 	_server = server;
@@ -208,10 +208,6 @@ void Channel::CHANGE_Pass(Client *client, bool add, std::vector<std::string> arg
 
 void Channel::CHANGE_Operator(Client *client, Server *serv, bool add, std::vector<std::string> argument)
 {
-	std::cout << "CHANGE OPERATOR DETECTED" << std::endl;
-
-	for (size_t i = 0; i < argument.size(); ++i)
-		std::cout << argument[i] << std::endl;
 	if (!Is_Operator(client))
 		return ERR(client, 482, client->get_nick() + " " + _name, "You're not channel operator");
 	Client *target_client = serv->FINDING_Client_str(argument[0]);

@@ -13,7 +13,7 @@ int     IS_Client_In_Vector(std::vector<Client*> client_vector, Client *client)
 
 std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argument) 
 {
-    //std::cout << "MODE PARSER DETECTED" << std::endl;
+
 
     std::vector<ModChange> result;
     std::string modeString = argument[1];
@@ -139,9 +139,7 @@ std::string intToString(int number)
 }
 
 void	ERR(Client *client, int err_id, std::string command, std::string msg)
-{
-    //std::cout << "ERR DETECTED ID:"  << err_id << std::endl;
-    
+{   
     std::string err_msg;
 	if (!client)
         return;
@@ -150,8 +148,6 @@ void	ERR(Client *client, int err_id, std::string command, std::string msg)
         err_msg = ":localhost " + intToString(err_id) + " :" + msg;
 	else
         err_msg = ":localhost " + intToString(err_id) + " " + command + " :" + msg;
-
-    std::cout << "ERR  MSG "  << err_msg << std::endl;
 	
     client->Send_message(err_msg);
 }
