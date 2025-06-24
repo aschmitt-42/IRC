@@ -183,7 +183,7 @@ void	Server::start()
 
 void signal_handler(int signum) 
 {
-    std::cout << "\n[INFO] SIGNAL : " << signum << " RECEIVED\n";
+    (void)signum;
     running = false;
 }
 

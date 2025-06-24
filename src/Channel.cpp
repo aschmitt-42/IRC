@@ -195,7 +195,7 @@ void Channel::CHANGE_Pass(Client *client, bool add, std::vector<std::string> arg
 {
 	std::string msg = ":" + client->get_Prefix() + " MODE " + _name + " " + (add ? "+" : "-") + "k";
 	
-	if (add) //faut il verifier quil y ait un mdp ou meme un mot de passe vide fonctionne
+	if (add)
 	{
 		_password = argument[0];
 		msg += " " + _password;
@@ -246,14 +246,14 @@ void Channel::USER_Limit(Client *client, bool add, std::vector<std::string> argu
 			if (nb_limit < 1)
 			{
 				//err nombre trop petit
-				return;
+				return ERR(client, 497, "MODE", "Bad mode value");
 			}
 			_nb_max_user = nb_limit;
 		}
 		else
 		{
 			//err pas un nombre
-			return;
+			return ERR(client, 472, "l", "unknown mode char to me");
 		}
 		msg += " " + intToString(_nb_max_user);
 	}
