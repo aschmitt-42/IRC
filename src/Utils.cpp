@@ -59,19 +59,6 @@ std::vector<ModChange> MODE_Parser(Client *client, std::vector<std::string> argu
 }
 
 
-// void    printmod(std::vector<ModChange> result)
-// {
-//     for (size_t i = 0; i < result.size(); ++i)
-//     {
-//         std::cout << "================== Mod" << i << " ==================" << std::endl;
-//         std::cout << "mod : " << result[i].mode << std::endl << "add : " << result[i].add <<  std::endl;
-//         std::cout << "Arguments :" << std::endl;
-//         for (size_t j = 0; j < result[i].argument.size(); ++j)
-//             std::cout << result[i].argument[j] << " | ";
-//     }
-//     std::cout << "\n========================================\n" << std::endl;
-// }
-
 Channel *Server::CHANNEL_Exist(std::string channel_name)
 {
     for (size_t i = 0; i < _channels.size(); ++i)
@@ -123,14 +110,13 @@ int create_server_socket(int port) {
         return (-1);
     }
 
-    // fcntl maybe for NON-BLOCKING SERVER
+    fcntl(socket_fd, F_SETFL, O_NONBLOCK);
 
-    // Liaison de la socket à l'adresse et au port
     struct sockaddr_in sockaddr;
     memset(&sockaddr, 0, sizeof(sockaddr));
 
     sockaddr.sin_family = AF_INET; // IPv4
-    sockaddr.sin_addr.s_addr = INADDR_ANY; // ou pour accessible que localement htonl(INADDR_LOOPBACK); // 127.0.0.1, localhost
+    sockaddr.sin_addr.s_addr = INADDR_ANY;
     sockaddr.sin_port = htons(port); 
     
     if (bind(socket_fd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) != 0) {
